@@ -33,8 +33,8 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
   const undoStack = useRef<ImageData[]>([]);
   const redoStack = useRef<ImageData[]>([]);
 
-  const [color, setColor] = useState(PALETTE[5]);
-  const [size, setSize] = useState(BRUSH_SIZES[3]);
+  const [color, setColor] = useState<string>(PALETTE[5] ?? "#e53935");
+  const [size, setSize] = useState<number>(BRUSH_SIZES[3] ?? 11);
   const [tool, setTool] = useState<"brush" | "eraser">("brush");
   const [title, setTitle] = useState(initial.title);
   const [published, setPublished] = useState(initial.is_published);

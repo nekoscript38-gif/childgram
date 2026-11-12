@@ -100,7 +100,7 @@ function BottomLink({
   return (
     <Link
       to={to}
-      activeOptions={{ exact }}
+      activeOptions={{ exact: !!exact }}
       className="flex flex-col items-center gap-0.5 px-3 text-xs font-bold text-muted-foreground"
       activeProps={{ className: "text-primary" }}
     >
