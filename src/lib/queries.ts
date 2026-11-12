@@ -17,7 +17,7 @@ export type DrawingCard = {
 };
 
 const CARD_SELECT =
-  "id,title,image_data,is_published,published_at,updated_at,user_id,profiles(id,username,avatar_id),hearts(count),comments(count)";
+  "id,title,image_data,is_published,published_at,updated_at,user_id,profiles!drawings_user_id_fkey(id,username,avatar_id),hearts(count),comments(count)";
 
 function escapeLike(v: string) {
   return v.replace(/[\\%_]/g, (c) => `\\${c}`);
@@ -42,7 +42,7 @@ export const meQuery = queryOptions({
       .select("id,username,avatar_id,bio,created_at")
       .eq("id", u.user.id)
       .maybeSingle();
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return data;
   },
 });
@@ -54,7 +54,7 @@ export const myPrivateQuery = queryOptions({
       .from("profile_private")
       .select("birth_date,parental_consent,terms_accepted_at")
       .maybeSingle();
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return data;
   },
 });
@@ -68,7 +68,7 @@ export const feedQuery = queryOptions({
       .eq("is_published", true)
       .order("published_at", { ascending: false })
       .limit(60);
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return data as unknown as DrawingCard[];
   },
 });
@@ -82,7 +82,7 @@ export const myHeartsQuery = queryOptions({
       .from("hearts")
       .select("drawing_id")
       .eq("user_id", u.user.id);
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return data.map((h) => h.drawing_id);
   },
 });
@@ -97,7 +97,7 @@ export const myDrawingsQuery = queryOptions({
       .select(CARD_SELECT)
       .eq("user_id", u.user.id)
       .order("updated_at", { ascending: false });
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return data as unknown as DrawingCard[];
   },
 });
@@ -111,7 +111,7 @@ export const profileQuery = (username: string) =>
         .select("id,username,avatar_id,bio,created_at")
         .ilike("username", escapeLike(username))
         .maybeSingle();
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       if (!profile) return null;
       const { data: drawings, error: e2 } = await supabase
         .from("drawings")
@@ -119,7 +119,7 @@ export const profileQuery = (username: string) =>
         .eq("user_id", profile.id)
         .eq("is_published", true)
         .order("published_at", { ascending: false });
-      if (e2) throw e2;
+      if (e2) throw new Error(e2.message);
       return { profile, drawings: drawings as unknown as DrawingCard[] };
     },
   });
@@ -141,7 +141,7 @@ export const drawingQuery = (id: string) =>
         .select(CARD_SELECT)
         .eq("id", id)
         .maybeSingle();
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       return (data as unknown as DrawingCard) ?? null;
     },
   });
@@ -155,7 +155,7 @@ export const commentsQuery = (drawingId: string) =>
         .select("id,content,created_at,user_id,profiles(id,username,avatar_id)")
         .eq("drawing_id", drawingId)
         .order("created_at", { ascending: true });
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       return data as unknown as CommentRow[];
     },
   });
@@ -171,7 +171,7 @@ export const editableDrawingQuery = (id: string) =>
         .eq("id", id)
         .eq("user_id", u.user?.id ?? "")
         .maybeSingle();
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       return data;
     },
   });
