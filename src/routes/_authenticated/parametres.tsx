@@ -1,3 +1,4 @@
+import { RouteError } from "@/components/childgram/RouteError";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/parametres")({
     ],
   }),
   component: Settings,
-  errorComponent: ({ error }) => <p className="sticker p-6 font-bold">Erreur : {error.message}</p>,
+  errorComponent: RouteError,
   notFoundComponent: () => <p className="sticker p-6 font-bold">Rien ici.</p>,
 });
 

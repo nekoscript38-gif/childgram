@@ -20,12 +20,12 @@ import {
 } from "@/lib/rules";
 import { cn } from "@/lib/utils";
 
-type Search = { mode?: "connexion" | "inscription"; redirect?: string };
+type Search = { mode?: "connexion" | "inscription" | undefined; redirect?: string | undefined };
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>): Search => ({
-    mode: s.mode === "inscription" ? "inscription" : s.mode === "connexion" ? "connexion" : undefined,
-    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+    mode: s["mode"] === "inscription" ? "inscription" : s["mode"] === "connexion" ? "connexion" : undefined,
+    redirect: typeof s["redirect"] === "string" ? s["redirect"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -121,7 +121,7 @@ function LoginForm({ onDone }: { onDone: () => void }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!isValidUsername(username)) return toast.error("Ce pseudo n'est pas valide");
+    if (!isValidUsername(username)) { toast.error("Ce pseudo n'est pas valide"); return; }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email: usernameToAuthEmail(username),
@@ -175,14 +175,14 @@ function SignupForm({ onDone }: { onDone: () => void }) {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!isValidUsername(username))
-      return toast.error("Ton pseudo doit faire 3 à 20 caractères : lettres, chiffres ou _");
+      { toast.error("Ton pseudo doit faire 3 à 20 caractères : lettres, chiffres ou _"); return; }
     if (password.length < PASSWORD_MIN)
-      return toast.error(`Ton mot de passe doit faire au moins ${PASSWORD_MIN} caractères`);
-    if (password !== password2) return toast.error("Les deux mots de passe ne sont pas pareils");
-    if (!birthDate || Number.isNaN(age) || birthDate > today) return toast.error("Indique une date de naissance valide");
+      { toast.error(`Ton mot de passe doit faire au moins ${PASSWORD_MIN} caractères`); return; }
+    if (password !== password2) { toast.error("Les deux mots de passe ne sont pas pareils"); return; }
+    if (!birthDate || Number.isNaN(age) || birthDate > today) { toast.error("Indique une date de naissance valide"); return; }
     if (underAge && !parentConsent)
-      return toast.error("Avant 13 ans, c'est un parent ou un représentant légal qui doit ouvrir le compte");
-    if (!terms) return toast.error("Il faut accepter les conditions d'utilisation et la politique de confidentialité");
+      { toast.error("Avant 13 ans, c'est un parent ou un représentant légal qui doit ouvrir le compte"); return; }
+    if (!terms) { toast.error("Il faut accepter les conditions d'utilisation et la politique de confidentialité"); return; }
 
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({

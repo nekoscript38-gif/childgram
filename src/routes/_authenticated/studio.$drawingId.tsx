@@ -1,3 +1,4 @@
+import { RouteError } from "@/components/childgram/RouteError";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/studio/$drawingId")({
     ],
   }),
   component: StudioEditor,
-  errorComponent: ({ error }) => <p className="sticker p-6 font-bold">Erreur : {error.message}</p>,
+  errorComponent: RouteError,
   notFoundComponent: () => (
     <div className="sticker p-8 text-center">
       <p className="font-display text-2xl font-bold">Ce dessin est introuvable.</p>

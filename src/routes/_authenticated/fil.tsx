@@ -1,3 +1,4 @@
+import { RouteError } from "@/components/childgram/RouteError";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/fil")({
     ],
   }),
   component: Feed,
-  errorComponent: ({ error }) => <p className="sticker p-6 font-bold">Erreur : {error.message}</p>,
+  errorComponent: RouteError,
   notFoundComponent: () => <p className="sticker p-6 font-bold">Rien ici.</p>,
 });
 

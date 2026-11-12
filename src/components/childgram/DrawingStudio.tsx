@@ -197,7 +197,7 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
     setSaving("delete");
     const { error } = await supabase.from("drawings").delete().eq("id", initial.id);
     setSaving(null);
-    if (error) return toast.error("Impossible de supprimer ce dessin");
+    if (error) { toast.error("Impossible de supprimer ce dessin"); return; }
     qc.invalidateQueries({ queryKey: ["my-drawings"] });
     qc.invalidateQueries({ queryKey: ["feed"] });
     qc.invalidateQueries({ queryKey: ["profile"] });

@@ -1,3 +1,4 @@
+import { RouteError } from "@/components/childgram/RouteError";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/dessin/$drawingId")({
     ],
   }),
   component: DrawingPage,
-  errorComponent: ({ error }) => <p className="sticker p-6 font-bold">Erreur : {error.message}</p>,
+  errorComponent: RouteError,
   notFoundComponent: () => (
     <div className="sticker mx-auto max-w-md p-8 text-center">
       <p className="font-display text-2xl font-bold">Ce dessin n'existe pas ou n'est plus publié.</p>
