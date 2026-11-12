@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedFilRouteImport } from './routes/_authenticated/fil'
+import { Route as AuthenticatedStudioIndexRouteImport } from './routes/_authenticated/studio.index'
 import { Route as AuthenticatedStudioDrawingIdRouteImport } from './routes/_authenticated/studio.$drawingId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -28,6 +30,17 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedFilRoute = AuthenticatedFilRouteImport.update({
+  id: '/fil',
+  path: '/fil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStudioIndexRoute =
+  AuthenticatedStudioIndexRouteImport.update({
+    id: '/studio/',
+    path: '/studio/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedStudioDrawingIdRoute =
   AuthenticatedStudioDrawingIdRouteImport.update({
     id: '/studio/$drawingId',
@@ -38,31 +51,39 @@ const AuthenticatedStudioDrawingIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/fil': typeof AuthenticatedFilRoute
   '/studio/$drawingId': typeof AuthenticatedStudioDrawingIdRoute
+  '/studio/': typeof AuthenticatedStudioIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/fil': typeof AuthenticatedFilRoute
   '/studio/$drawingId': typeof AuthenticatedStudioDrawingIdRoute
+  '/studio': typeof AuthenticatedStudioIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/fil': typeof AuthenticatedFilRoute
   '/_authenticated/studio/$drawingId': typeof AuthenticatedStudioDrawingIdRoute
+  '/_authenticated/studio/': typeof AuthenticatedStudioIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/studio/$drawingId'
+  fullPaths: '/' | '/auth' | '/fil' | '/studio/$drawingId' | '/studio/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/studio/$drawingId'
+  to: '/' | '/auth' | '/fil' | '/studio/$drawingId' | '/studio'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/fil'
     | '/_authenticated/studio/$drawingId'
+    | '/_authenticated/studio/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,6 +115,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/fil': {
+      id: '/_authenticated/fil'
+      path: '/fil'
+      fullPath: '/fil'
+      preLoaderRoute: typeof AuthenticatedFilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/studio/': {
+      id: '/_authenticated/studio/'
+      path: '/studio'
+      fullPath: '/studio/'
+      preLoaderRoute: typeof AuthenticatedStudioIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/studio/$drawingId': {
       id: '/_authenticated/studio/$drawingId'
       path: '/studio/$drawingId'
@@ -105,11 +140,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedFilRoute: typeof AuthenticatedFilRoute
   AuthenticatedStudioDrawingIdRoute: typeof AuthenticatedStudioDrawingIdRoute
+  AuthenticatedStudioIndexRoute: typeof AuthenticatedStudioIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedFilRoute: AuthenticatedFilRoute,
   AuthenticatedStudioDrawingIdRoute: AuthenticatedStudioDrawingIdRoute,
+  AuthenticatedStudioIndexRoute: AuthenticatedStudioIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
