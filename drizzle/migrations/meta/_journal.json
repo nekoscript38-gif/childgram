@@ -8,6 +8,13 @@
       "when": 1794498663746,
       "tag": "0000_childgram_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794499691434,
+      "tag": "0001_restrict_profile_visibility",
+      "breakpoints": true
     }
   ]
 }
