@@ -12,7 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ConditionsRouteImport } from './routes/conditions'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as AuthenticatedFilRouteImport } from './routes/_authenticated/fil'
+import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
+import { Route as AuthenticatedDessinDrawingIdRouteImport } from './routes/_authenticated/dessin.$drawingId'
+import { Route as AuthenticatedProfilUsernameRouteImport } from './routes/_authenticated/profil.$username'
 import { Route as AuthenticatedStudioIndexRouteImport } from './routes/_authenticated/studio.index'
 import { Route as AuthenticatedStudioDrawingIdRouteImport } from './routes/_authenticated/studio.$drawingId'
 
@@ -30,11 +35,38 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConditionsRoute = ConditionsRouteImport.update({
+  id: '/conditions',
+  path: '/conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedFilRoute = AuthenticatedFilRouteImport.update({
   id: '/fil',
   path: '/fil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedParametresRoute = AuthenticatedParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDessinDrawingIdRoute =
+  AuthenticatedDessinDrawingIdRouteImport.update({
+    id: '/dessin/$drawingId',
+    path: '/dessin/$drawingId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedProfilUsernameRoute =
+  AuthenticatedProfilUsernameRouteImport.update({
+    id: '/profil/$username',
+    path: '/profil/$username',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedStudioIndexRoute =
   AuthenticatedStudioIndexRouteImport.update({
     id: '/studio/',
@@ -51,14 +83,24 @@ const AuthenticatedStudioDrawingIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/fil': typeof AuthenticatedFilRoute
+  '/parametres': typeof AuthenticatedParametresRoute
+  '/dessin/$drawingId': typeof AuthenticatedDessinDrawingIdRoute
+  '/profil/$username': typeof AuthenticatedProfilUsernameRoute
   '/studio/$drawingId': typeof AuthenticatedStudioDrawingIdRoute
   '/studio/': typeof AuthenticatedStudioIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/fil': typeof AuthenticatedFilRoute
+  '/parametres': typeof AuthenticatedParametresRoute
+  '/dessin/$drawingId': typeof AuthenticatedDessinDrawingIdRoute
+  '/profil/$username': typeof AuthenticatedProfilUsernameRoute
   '/studio/$drawingId': typeof AuthenticatedStudioDrawingIdRoute
   '/studio': typeof AuthenticatedStudioIndexRoute
 }
@@ -67,21 +109,51 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/conditions': typeof ConditionsRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/_authenticated/fil': typeof AuthenticatedFilRoute
+  '/_authenticated/parametres': typeof AuthenticatedParametresRoute
+  '/_authenticated/dessin/$drawingId': typeof AuthenticatedDessinDrawingIdRoute
+  '/_authenticated/profil/$username': typeof AuthenticatedProfilUsernameRoute
   '/_authenticated/studio/$drawingId': typeof AuthenticatedStudioDrawingIdRoute
   '/_authenticated/studio/': typeof AuthenticatedStudioIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/fil' | '/studio/$drawingId' | '/studio/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/conditions'
+    | '/confidentialite'
+    | '/fil'
+    | '/parametres'
+    | '/dessin/$drawingId'
+    | '/profil/$username'
+    | '/studio/$drawingId'
+    | '/studio/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/fil' | '/studio/$drawingId' | '/studio'
+  to:
+    | '/'
+    | '/auth'
+    | '/conditions'
+    | '/confidentialite'
+    | '/fil'
+    | '/parametres'
+    | '/dessin/$drawingId'
+    | '/profil/$username'
+    | '/studio/$drawingId'
+    | '/studio'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/conditions'
+    | '/confidentialite'
     | '/_authenticated/fil'
+    | '/_authenticated/parametres'
+    | '/_authenticated/dessin/$drawingId'
+    | '/_authenticated/profil/$username'
     | '/_authenticated/studio/$drawingId'
     | '/_authenticated/studio/'
   fileRoutesById: FileRoutesById
@@ -90,6 +162,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ConditionsRoute: typeof ConditionsRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -115,11 +189,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/conditions': {
+      id: '/conditions'
+      path: '/conditions'
+      fullPath: '/conditions'
+      preLoaderRoute: typeof ConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/fil': {
       id: '/_authenticated/fil'
       path: '/fil'
       fullPath: '/fil'
       preLoaderRoute: typeof AuthenticatedFilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/parametres': {
+      id: '/_authenticated/parametres'
+      path: '/parametres'
+      fullPath: '/parametres'
+      preLoaderRoute: typeof AuthenticatedParametresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dessin/$drawingId': {
+      id: '/_authenticated/dessin/$drawingId'
+      path: '/dessin/$drawingId'
+      fullPath: '/dessin/$drawingId'
+      preLoaderRoute: typeof AuthenticatedDessinDrawingIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profil/$username': {
+      id: '/_authenticated/profil/$username'
+      path: '/profil/$username'
+      fullPath: '/profil/$username'
+      preLoaderRoute: typeof AuthenticatedProfilUsernameRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/studio/': {
@@ -141,12 +250,18 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedFilRoute: typeof AuthenticatedFilRoute
+  AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
+  AuthenticatedDessinDrawingIdRoute: typeof AuthenticatedDessinDrawingIdRoute
+  AuthenticatedProfilUsernameRoute: typeof AuthenticatedProfilUsernameRoute
   AuthenticatedStudioDrawingIdRoute: typeof AuthenticatedStudioDrawingIdRoute
   AuthenticatedStudioIndexRoute: typeof AuthenticatedStudioIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFilRoute: AuthenticatedFilRoute,
+  AuthenticatedParametresRoute: AuthenticatedParametresRoute,
+  AuthenticatedDessinDrawingIdRoute: AuthenticatedDessinDrawingIdRoute,
+  AuthenticatedProfilUsernameRoute: AuthenticatedProfilUsernameRoute,
   AuthenticatedStudioDrawingIdRoute: AuthenticatedStudioDrawingIdRoute,
   AuthenticatedStudioIndexRoute: AuthenticatedStudioIndexRoute,
 }
@@ -158,6 +273,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ConditionsRoute: ConditionsRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
