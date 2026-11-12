@@ -28,3 +28,12 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules (ChildGram)
+
+- Auth is username + password: the client derives a private synthetic email (`usernameToAuthEmail` in `src/lib/rules.ts`) and auto-confirm is on, because kids never give an email.
+- Profile creation and the under-13 consent check run in the `handle_new_user` trigger from signup metadata, so the rule can't be bypassed from the browser.
+- Birth date and consent live in `profile_private` (owner-only RLS); `profiles` is readable by all signed-in users and only `avatar_id`/`bio` are column-granted for update.
+- Drawings are stored as image data URLs in `drawings.image_data` (no storage bucket), so visibility is enforced purely by table RLS.
+- All social pages live under `src/routes/_authenticated/` (client-only); content is never visible signed-out, for child safety.
+- Embeds from `drawings` to `profiles` must name `drawings_user_id_fkey`, because `hearts`/`comments` make the relation ambiguous.
