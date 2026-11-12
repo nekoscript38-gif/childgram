@@ -55,7 +55,9 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
       img.onload = () => ctx.drawImage(img, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
       img.src = initial.image_data;
     }
-  }, [initial.image_data]);
+    // Load the saved picture only once: later refetches must not wipe new strokes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const snapshot = useCallback(() => {
     const ctx = ctxRef.current!;
