@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, isValidBirthDate, isValidUsername, needsParentalConsent, sameAgeGroup, usernameToAuthEmail } from "./rules";
+import { ageOn, canCommentBetween, isValidBirthDate, isValidUsername, needsParentalConsent, sameAgeGroup, usernameToAuthEmail } from "./rules";
 import { AVATARS } from "./avatars";
 import { BRUSH_SIZES, PALETTE } from "./palette";
 
@@ -65,5 +65,23 @@ describe("age barrier for comments", () => {
   });
   it("allows two users aged 14 and over", () => {
     expect(sameAgeGroup(14, 18)).toBe(true);
+  });
+});
+
+describe("under-9 comment block", () => {
+  it("blocks an 8-year-old from writing a comment to another 8-year-old", () => {
+    expect(canCommentBetween(8, 8)).toBe(false);
+  });
+  it("blocks a 13-year-old from commenting a 5-year-old", () => {
+    expect(canCommentBetween(13, 5)).toBe(false);
+  });
+  it("blocks an 8-year-old from commenting a 10-year-old", () => {
+    expect(canCommentBetween(8, 10)).toBe(false);
+  });
+  it("allows a 9-year-old and a 13-year-old", () => {
+    expect(canCommentBetween(9, 13)).toBe(true);
+  });
+  it("still blocks 14+ from commenting a 10-year-old", () => {
+    expect(canCommentBetween(15, 10)).toBe(false);
   });
 });

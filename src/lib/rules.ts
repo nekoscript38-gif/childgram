@@ -44,8 +44,14 @@ export function isValidBirthDate(birthDate: string, today: Date = new Date()) {
   return date >= oldest;
 }
 
-/** Comments only flow between kids of the same group: under 14, or 14 and older. */
+/** Comments only flow between kids of the same group: 9 to 13, or 14 and older. */
 export const AGE_BARRIER = 14;
+/** Under this age a kid can neither write nor receive comments. */
+export const MIN_COMMENT_AGE = 9;
 export function sameAgeGroup(ageA: number, ageB: number) {
   return ageA >= AGE_BARRIER === ageB >= AGE_BARRIER;
+}
+/** Mirrors `can_comment_on` in the database, which is the real enforcement. */
+export function canCommentBetween(writerAge: number, authorAge: number) {
+  return writerAge >= MIN_COMMENT_AGE && authorAge >= MIN_COMMENT_AGE && sameAgeGroup(writerAge, authorAge);
 }

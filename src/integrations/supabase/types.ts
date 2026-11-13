@@ -207,6 +207,7 @@ export type Database = {
     }
     Functions: {
       can_comment_on: { Args: { _drawing_id: string }; Returns: boolean }
+      comment_block_reason: { Args: { _drawing_id: string }; Returns: string }
       current_age: {
         Args: { p: Database["public"]["Tables"]["profiles"]["Row"] }
         Returns: number
