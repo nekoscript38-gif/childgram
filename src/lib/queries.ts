@@ -50,9 +50,14 @@ export const meQuery = queryOptions({
 export const myPrivateQuery = queryOptions({
   queryKey: ["me", "private"],
   queryFn: async () => {
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return null;
+    // Always filter by the caller: admins can read every row, so an unfiltered
+    // maybeSingle() would fail with "multiple rows" for them.
     const { data, error } = await supabase
       .from("profile_private")
       .select("birth_date,parental_consent,terms_accepted_at")
+      .eq("user_id", u.user.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
     return data;
