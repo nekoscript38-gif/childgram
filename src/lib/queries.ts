@@ -234,13 +234,16 @@ export const editableDrawingQuery = (id: string) =>
     },
   });
 
-/** Age barrier: under-14 and 14+ kids can't comment on each other's drawings (enforced by RLS). */
+/** Why a comment is blocked (null when allowed). Real enforcement is the comments RLS policy. */
+export type CommentBlockReason = "self_too_young" | "author_too_young" | "other_group" | "unknown" | null;
+
+/** Age barrier: under-9 kids get no comments; 9-13 and 14+ can't comment on each other (enforced by RLS). */
 export const canCommentQuery = (drawingId: string) =>
   queryOptions({
     queryKey: ["can-comment", drawingId],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("can_comment_on", { _drawing_id: drawingId });
+      const { data, error } = await supabase.rpc("comment_block_reason", { _drawing_id: drawingId });
       if (error) throw new Error(error.message);
-      return data === true;
+      return (data ?? null) as CommentBlockReason;
     },
   });

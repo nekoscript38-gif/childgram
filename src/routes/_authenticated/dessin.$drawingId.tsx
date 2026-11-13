@@ -49,7 +49,8 @@ function DrawingPage() {
   const { data: comments } = useSuspenseQuery(commentsQuery(drawingId));
   const { data: hearts } = useSuspenseQuery(myHeartsQuery);
   const { data: me } = useSuspenseQuery(meQuery);
-  const { data: canComment } = useSuspenseQuery(canCommentQuery(drawingId));
+  const { data: blockReason } = useSuspenseQuery(canCommentQuery(drawingId));
+  const canComment = blockReason === null;
   const qc = useQueryClient();
   const [text, setText] = useState("");
 
@@ -63,7 +64,7 @@ function DrawingPage() {
         .from("comments")
         .insert({ drawing_id: drawingId, user_id: me!.id, content: content.slice(0, COMMENT_MAX) });
       if (error) {
-        if (error.code === "42501") throw new Error("Tu ne peux pas commenter ce dessin : il vient d'un artiste d'une autre tranche d'âge.");
+        if (error.code === "42501") throw new Error("Tu ne peux pas commenter ce dessin à cause de la règle des âges.");
         throw new Error("Impossible d'envoyer ton commentaire");
       }
     },
@@ -180,7 +181,11 @@ function DrawingPage() {
           {drawing.is_published && !canComment && (
             <p className="flex items-start gap-2 rounded-2xl border-[2.5px] border-ink bg-secondary p-3 text-sm font-bold">
               <Lock className="h-4 w-4 shrink-0" />
-              Les commentaires sont réservés aux artistes de la même tranche d'âge (moins de 14 ans ou 14 ans et plus). Tu peux quand même envoyer un cœur !
+              {blockReason === "self_too_young"
+                ? "Les commentaires s'ouvriront pour toi à tes 9 ans. En attendant, tu peux envoyer des cœurs !"
+                : blockReason === "author_too_young"
+                  ? "Cet artiste a moins de 9 ans : ses dessins ne reçoivent pas de commentaires. Tu peux quand même lui envoyer un cœur !"
+                  : "Les commentaires sont réservés aux artistes de la même tranche d'âge (9 à 13 ans, ou 14 ans et plus). Tu peux quand même envoyer un cœur !"}
             </p>
           )}
 
