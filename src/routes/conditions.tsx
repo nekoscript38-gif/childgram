@@ -54,6 +54,10 @@ function Terms() {
         <li>On laisse des commentaires gentils et respectueux. Pas de moqueries, d'insultes ni de harcèlement.</li>
         <li>Pas de contenu violent, effrayant, choquant ou inapproprié pour des enfants.</li>
         <li>On ne donne jamais rendez-vous à quelqu'un rencontré sur ChildGram.</li>
+        <li>
+          Les commentaires se font entre artistes du même âge : de 9 à 13 ans d'un côté, 14 ans et plus de l'autre. Avant 9 ans, on ne
+          peut ni écrire ni recevoir de commentaires, mais tout le monde peut envoyer des cœurs.
+        </li>
       </ul>
 
       <h2>5. Tes dessins</h2>
