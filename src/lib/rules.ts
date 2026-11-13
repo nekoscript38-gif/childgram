@@ -35,7 +35,7 @@ export function needsParentalConsent(birthDate: string, today: Date = new Date()
 /** A birth date must be a real day, not in the future, and at most 120 years ago. */
 export function isValidBirthDate(birthDate: string, today: Date = new Date()) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return false;
-  const [y, m, d] = birthDate.split("-").map(Number);
+  const [y = 0, m = 0, d = 0] = birthDate.split("-").map(Number);
   const date = new Date(y, m - 1, d);
   if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) return false;
   const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());

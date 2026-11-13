@@ -106,12 +106,13 @@ export const profileQuery = (username: string) =>
   queryOptions({
     queryKey: ["profile", username.toLowerCase()],
     queryFn: async () => {
-      const { data: profile, error } = await supabase
+      const { data: row, error } = await supabase
         .from("profiles")
         .select("id,username,avatar_id,bio,created_at,current_age")
         .ilike("username", escapeLike(username))
         .maybeSingle();
       if (error) throw new Error(error.message);
+      const profile = row as unknown as PublicProfile | null;
       if (!profile) return null;
       const { data: drawings, error: e2 } = await supabase
         .from("drawings")
@@ -121,7 +122,7 @@ export const profileQuery = (username: string) =>
         .order("published_at", { ascending: false });
       if (e2) throw new Error(e2.message);
       return {
-        profile: profile as unknown as PublicProfile,
+        profile,
         drawings: drawings as unknown as DrawingCard[],
       };
     },
