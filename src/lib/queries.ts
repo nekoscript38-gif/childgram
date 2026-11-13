@@ -106,12 +106,13 @@ export const profileQuery = (username: string) =>
   queryOptions({
     queryKey: ["profile", username.toLowerCase()],
     queryFn: async () => {
-      const { data: profile, error } = await supabase
+      const { data: row, error } = await supabase
         .from("profiles")
-        .select("id,username,avatar_id,bio,created_at")
+        .select("id,username,avatar_id,bio,created_at,current_age")
         .ilike("username", escapeLike(username))
         .maybeSingle();
       if (error) throw new Error(error.message);
+      const profile = row as unknown as PublicProfile | null;
       if (!profile) return null;
       const { data: drawings, error: e2 } = await supabase
         .from("drawings")
@@ -120,9 +121,61 @@ export const profileQuery = (username: string) =>
         .eq("is_published", true)
         .order("published_at", { ascending: false });
       if (e2) throw new Error(e2.message);
-      return { profile, drawings: drawings as unknown as DrawingCard[] };
+      return {
+        profile,
+        drawings: drawings as unknown as DrawingCard[],
+      };
     },
   });
+
+export type PublicProfile = {
+  id: string;
+  username: string;
+  avatar_id: number;
+  bio: string;
+  created_at: string;
+  /** Current age in years (number only, never the birth date). */
+  current_age: number | null;
+};
+
+export const isAdminQuery = queryOptions({
+  queryKey: ["me", "is-admin"],
+  queryFn: async () => {
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return false;
+    const { data, error } = await supabase.rpc("has_role", { _user_id: u.user.id, _role: "admin" });
+    if (error) return false;
+    return data === true;
+  },
+  staleTime: 5 * 60_000,
+});
+
+export type AdminUserRow = {
+  id: string;
+  username: string;
+  avatar_id: number;
+  created_at: string;
+  birth_date: string | null;
+  parental_consent: boolean;
+};
+
+export const adminUsersQuery = queryOptions({
+  queryKey: ["admin", "users"],
+  queryFn: async () => {
+    const [{ data: profiles, error: e1 }, { data: priv, error: e2 }] = await Promise.all([
+      supabase.from("profiles").select("id,username,avatar_id,created_at").order("created_at", { ascending: false }),
+      supabase.from("profile_private").select("user_id,birth_date,parental_consent"),
+    ]);
+    if (e1) throw new Error(e1.message);
+    if (e2) throw new Error(e2.message);
+    const byId = new Map(priv.map((p) => [p.user_id, p]));
+    return profiles.map<AdminUserRow>((p) => ({
+      ...p,
+      birth_date: byId.get(p.id)?.birth_date ?? null,
+      parental_consent: byId.get(p.id)?.parental_consent ?? false,
+    }));
+  },
+});
 
 export type CommentRow = {
   id: string;

@@ -15,6 +15,13 @@
       "when": 1794499691434,
       "tag": "0001_restrict_profile_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794563348648,
+      "tag": "0002_admin_panel_and_public_age",
+      "breakpoints": true
     }
   ]
 }

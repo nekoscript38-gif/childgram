@@ -33,7 +33,9 @@ use the editor.
 
 - Auth is username + password: the client derives a private synthetic email (`usernameToAuthEmail` in `src/lib/rules.ts`) and auto-confirm is on, because kids never give an email.
 - Profile creation and the under-13 consent check run in the `handle_new_user` trigger from signup metadata, so the rule can't be bypassed from the browser.
-- Birth date and consent live in `profile_private` (owner-only RLS); `profiles` is readable by all signed-in users and only `avatar_id`/`bio` are column-granted for update.
+- Birth date and consent live in `profile_private` (owner + admin read; only admins may update `birth_date`); other users see only the age number via the `current_age(profiles)` computed field, never the date.
+- Admin rights come only from `user_roles` checked with `has_role()` in RLS; the `/admin` route guard is UI-only.
+- `profiles` is visible to its owner, admins, and kids who shared something; only `avatar_id`/`bio` are column-granted for update.
 - Drawings are stored as image data URLs in `drawings.image_data` (no storage bucket), so visibility is enforced purely by table RLS.
 - All social pages live under `src/routes/_authenticated/` (client-only); content is never visible signed-out, for child safety.
 - Embeds from `drawings` to `profiles` must name `drawings_user_id_fkey`, because `hearts`/`comments` make the relation ambiguous.

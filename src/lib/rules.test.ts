@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
+import { ageOn, isValidBirthDate, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
 import { AVATARS } from "./avatars";
 import { BRUSH_SIZES, PALETTE } from "./palette";
 
@@ -36,4 +36,19 @@ describe("studio and avatars", () => {
   it("offers exactly 20 avatars", () => expect(AVATARS).toHaveLength(20));
   it("offers exactly 25 colors", () => expect(new Set(PALETTE).size).toBe(25));
   it("offers exactly 8 brush sizes", () => expect(BRUSH_SIZES).toHaveLength(8));
+});
+
+describe("admin birth date correction", () => {
+  it("rejects a birth date in the future", () => {
+    expect(isValidBirthDate("2026-11-13", today)).toBe(false);
+  });
+  it("accepts today's date", () => {
+    expect(isValidBirthDate("2026-11-12", today)).toBe(true);
+  });
+  it("rejects a date more than 120 years ago", () => {
+    expect(isValidBirthDate("1906-11-11", today)).toBe(false);
+  });
+  it("rejects an impossible day", () => {
+    expect(isValidBirthDate("2015-02-30", today)).toBe(false);
+  });
 });

@@ -1,7 +1,7 @@
 import { RouteError } from "@/components/childgram/RouteError";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Heart, Images, Pencil } from "lucide-react";
+import { Cake, Heart, Images, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KidAvatar } from "@/components/childgram/Avatar";
 import { DrawingCard } from "@/components/childgram/DrawingCard";
@@ -57,6 +57,11 @@ function ProfilePage() {
             <p className="font-semibold text-muted-foreground">Pas encore de bio.</p>
           )}
           <div className="flex flex-wrap justify-center gap-2 pt-1 sm:justify-start">
+            {profile.current_age !== null && (
+              <span className="flex items-center gap-1.5 rounded-full border-[2.5px] border-ink bg-accent px-3 py-1 font-display font-bold text-accent-foreground">
+                <Cake className="h-4 w-4" /> {profile.current_age} an{profile.current_age > 1 ? "s" : ""}
+              </span>
+            )}
             <span className="flex items-center gap-1.5 rounded-full border-[2.5px] border-ink bg-secondary px-3 py-1 font-display font-bold">
               <Images className="h-4 w-4" /> {drawings.length} dessin{drawings.length > 1 ? "s" : ""}
             </span>
