@@ -233,3 +233,14 @@ export const editableDrawingQuery = (id: string) =>
       return data;
     },
   });
+
+/** Age barrier: under-14 and 14+ kids can't comment on each other's drawings (enforced by RLS). */
+export const canCommentQuery = (drawingId: string) =>
+  queryOptions({
+    queryKey: ["can-comment", drawingId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("can_comment_on", { _drawing_id: drawingId });
+      if (error) throw new Error(error.message);
+      return data === true;
+    },
+  });

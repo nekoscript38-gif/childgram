@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, isValidBirthDate, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
+import { ageOn, isValidBirthDate, isValidUsername, needsParentalConsent, sameAgeGroup, usernameToAuthEmail } from "./rules";
 import { AVATARS } from "./avatars";
 import { BRUSH_SIZES, PALETTE } from "./palette";
 
@@ -50,5 +50,20 @@ describe("admin birth date correction", () => {
   });
   it("rejects an impossible day", () => {
     expect(isValidBirthDate("2015-02-30", today)).toBe(false);
+  });
+});
+
+describe("age barrier for comments", () => {
+  it("blocks a 14-year-old from commenting a 13-year-old", () => {
+    expect(sameAgeGroup(14, 13)).toBe(false);
+  });
+  it("blocks a 13-year-old from commenting a 14-year-old", () => {
+    expect(sameAgeGroup(13, 14)).toBe(false);
+  });
+  it("allows two kids under 14", () => {
+    expect(sameAgeGroup(9, 13)).toBe(true);
+  });
+  it("allows two users aged 14 and over", () => {
+    expect(sameAgeGroup(14, 18)).toBe(true);
   });
 });
