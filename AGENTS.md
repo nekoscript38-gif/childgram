@@ -39,3 +39,4 @@ use the editor.
 - Drawings are stored as image data URLs in `drawings.image_data` (no storage bucket), so visibility is enforced purely by table RLS.
 - All social pages live under `src/routes/_authenticated/` (client-only); content is never visible signed-out, for child safety.
 - Embeds from `drawings` to `profiles` must name `drawings_user_id_fkey`, because `hearts`/`comments` make the relation ambiguous.
+- Comment age barrier: the comments INSERT policy calls `can_comment_on(drawing_id)` (SECURITY DEFINER, compares both birth dates against `AGE_BARRIER` in `src/lib/rules.ts`), so the rule holds even if the UI is bypassed; the UI only hides the form.
