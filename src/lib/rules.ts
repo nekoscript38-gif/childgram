@@ -43,3 +43,9 @@ export function isValidBirthDate(birthDate: string, today: Date = new Date()) {
   const oldest = new Date(start.getFullYear() - 120, start.getMonth(), start.getDate());
   return date >= oldest;
 }
+
+/** Comments only flow between kids of the same group: under 14, or 14 and older. */
+export const AGE_BARRIER = 14;
+export function sameAgeGroup(ageA: number, ageB: number) {
+  return ageA >= AGE_BARRIER === ageB >= AGE_BARRIER;
+}

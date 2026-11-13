@@ -5,13 +5,13 @@ import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
-import { Pencil, Send, ShieldCheck, Trash2 } from "lucide-react";
+import { Lock, Pencil, Send, ShieldCheck, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { KidAvatar } from "@/components/childgram/Avatar";
 import { HeartButton } from "@/components/childgram/HeartButton";
-import { commentsQuery, drawingQuery, meQuery, myHeartsQuery } from "@/lib/queries";
+import { canCommentQuery, commentsQuery, drawingQuery, meQuery, myHeartsQuery } from "@/lib/queries";
 import { COMMENT_MAX } from "@/lib/rules";
 
 export const Route = createFileRoute("/_authenticated/dessin/$drawingId")({
@@ -21,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/dessin/$drawingId")({
       context.queryClient.ensureQueryData(commentsQuery(params.drawingId)),
       context.queryClient.ensureQueryData(myHeartsQuery),
       context.queryClient.ensureQueryData(meQuery),
+      context.queryClient.ensureQueryData(canCommentQuery(params.drawingId)),
     ]);
     if (!d) throw notFound();
   },
@@ -48,6 +49,7 @@ function DrawingPage() {
   const { data: comments } = useSuspenseQuery(commentsQuery(drawingId));
   const { data: hearts } = useSuspenseQuery(myHeartsQuery);
   const { data: me } = useSuspenseQuery(meQuery);
+  const { data: canComment } = useSuspenseQuery(canCommentQuery(drawingId));
   const qc = useQueryClient();
   const [text, setText] = useState("");
 
@@ -60,7 +62,10 @@ function DrawingPage() {
       const { error } = await supabase
         .from("comments")
         .insert({ drawing_id: drawingId, user_id: me!.id, content: content.slice(0, COMMENT_MAX) });
-      if (error) throw new Error("Impossible d'envoyer ton commentaire");
+      if (error) {
+        if (error.code === "42501") throw new Error("Tu ne peux pas commenter ce dessin : il vient d'un artiste d'une autre tranche d'âge.");
+        throw new Error("Impossible d'envoyer ton commentaire");
+      }
     },
     onSuccess: () => {
       setText("");
@@ -172,7 +177,14 @@ function DrawingPage() {
             ))}
           </ul>
 
-          {drawing.is_published && (
+          {drawing.is_published && !canComment && (
+            <p className="flex items-start gap-2 rounded-2xl border-[2.5px] border-ink bg-secondary p-3 text-sm font-bold">
+              <Lock className="h-4 w-4 shrink-0" />
+              Les commentaires sont réservés aux artistes de la même tranche d'âge (moins de 14 ans ou 14 ans et plus). Tu peux quand même envoyer un cœur !
+            </p>
+          )}
+
+          {drawing.is_published && canComment && (
             <form
               onSubmit={(e) => {
                 e.preventDefault();
