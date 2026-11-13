@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ConditionsRouteImport } from './routes/conditions'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedFilRouteImport } from './routes/_authenticated/fil'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
 import { Route as AuthenticatedDessinDrawingIdRouteImport } from './routes/_authenticated/dessin.$drawingId'
@@ -44,6 +45,11 @@ const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
   id: '/confidentialite',
   path: '/confidentialite',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedFilRoute = AuthenticatedFilRouteImport.update({
   id: '/fil',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/conditions': typeof ConditionsRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/fil': typeof AuthenticatedFilRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/dessin/$drawingId': typeof AuthenticatedDessinDrawingIdRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/conditions': typeof ConditionsRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/fil': typeof AuthenticatedFilRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/dessin/$drawingId': typeof AuthenticatedDessinDrawingIdRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/conditions': typeof ConditionsRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/fil': typeof AuthenticatedFilRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
   '/_authenticated/dessin/$drawingId': typeof AuthenticatedDessinDrawingIdRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/conditions'
     | '/confidentialite'
+    | '/admin'
     | '/fil'
     | '/parametres'
     | '/dessin/$drawingId'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/conditions'
     | '/confidentialite'
+    | '/admin'
     | '/fil'
     | '/parametres'
     | '/dessin/$drawingId'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/conditions'
     | '/confidentialite'
+    | '/_authenticated/admin'
     | '/_authenticated/fil'
     | '/_authenticated/parametres'
     | '/_authenticated/dessin/$drawingId'
@@ -203,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfidentialiteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/fil': {
       id: '/_authenticated/fil'
       path: '/fil'
@@ -249,6 +268,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedFilRoute: typeof AuthenticatedFilRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
   AuthenticatedDessinDrawingIdRoute: typeof AuthenticatedDessinDrawingIdRoute
@@ -258,6 +278,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedFilRoute: AuthenticatedFilRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
   AuthenticatedDessinDrawingIdRoute: AuthenticatedDessinDrawingIdRoute,
