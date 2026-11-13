@@ -206,6 +206,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_comment_on: { Args: { _drawing_id: string }; Returns: boolean }
       current_age: {
         Args: { p: Database["public"]["Tables"]["profiles"]["Row"] }
         Returns: number
