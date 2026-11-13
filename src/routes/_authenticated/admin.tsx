@@ -1,0 +1,146 @@
+import { RouteError } from "@/components/childgram/RouteError";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { AlertTriangle, Check, Search, ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { KidAvatar } from "@/components/childgram/Avatar";
+import { adminUsersQuery, isAdminQuery, type AdminUserRow } from "@/lib/queries";
+import { ageOn, isValidBirthDate, needsParentalConsent } from "@/lib/rules";
+
+export const Route = createFileRoute("/_authenticated/admin")({
+  beforeLoad: async ({ context }) => {
+    const isAdmin = await context.queryClient.ensureQueryData(isAdminQuery);
+    if (!isAdmin) throw redirect({ to: "/fil" });
+  },
+  loader: ({ context }) => context.queryClient.ensureQueryData(adminUsersQuery),
+  head: () => ({
+    meta: [
+      { title: "Administration — ChildGram" },
+      { name: "description", content: "Espace administratrice de ChildGram : vérification des âges." },
+      { property: "og:title", content: "Administration — ChildGram" },
+      { property: "og:description", content: "Espace administratrice de ChildGram : vérification des âges." },
+    ],
+  }),
+  component: AdminPage,
+  errorComponent: RouteError,
+});
+
+function AdminPage() {
+  const { data: users } = useSuspenseQuery(adminUsersQuery);
+  const [q, setQ] = useState("");
+  const filtered = useMemo(
+    () => users.filter((u) => u.username.toLowerCase().includes(q.trim().toLowerCase())),
+    [users, q],
+  );
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="flex items-center gap-3 text-4xl font-extrabold">
+            <ShieldCheck className="h-9 w-9" /> Administration
+          </h1>
+          <p className="mt-1 font-semibold text-muted-foreground">
+            {users.length} compte{users.length > 1 ? "s" : ""}. Les dates de naissance ne sont visibles que par toi.
+          </p>
+        </div>
+        <div className="relative w-full sm:w-64">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Chercher un pseudo" className="pl-9" />
+        </div>
+      </div>
+
+      <ul className="space-y-4">
+        {filtered.map((u) => (
+          <UserRow key={u.id} user={u} />
+        ))}
+        {filtered.length === 0 && (
+          <li className="sticker p-6 text-center font-bold">Aucun compte trouvé.</li>
+        )}
+      </ul>
+    </div>
+  );
+}
+
+function UserRow({ user }: { user: AdminUserRow }) {
+  const qc = useQueryClient();
+  const [date, setDate] = useState(user.birth_date ?? "");
+  const changed = date !== (user.birth_date ?? "");
+  const valid = isValidBirthDate(date);
+  const age = user.birth_date ? ageOn(user.birth_date) : null;
+  const newAge = valid ? ageOn(date) : null;
+  const missingConsent = user.birth_date && needsParentalConsent(user.birth_date) && !user.parental_consent;
+  const today = format(new Date(), "yyyy-MM-dd");
+
+  const save = useMutation({
+    mutationFn: async () => {
+      if (!isValidBirthDate(date)) throw new Error("Date de naissance invalide");
+      const { data, error } = await supabase
+        .from("profile_private")
+        .update({ birth_date: date })
+        .eq("user_id", user.id)
+        .select("user_id");
+      if (error || !data?.length) throw new Error("Impossible d'enregistrer la date");
+    },
+    onSuccess: () => {
+      toast.success(`Date de naissance de @${user.username} corrigée`);
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["me", "private"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <li className="sticker flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
+      <Link to="/profil/$username" params={{ username: user.username }} className="flex min-w-0 flex-1 items-center gap-3">
+        <KidAvatar avatarId={user.avatar_id} size={52} />
+        <div className="min-w-0">
+          <p className="truncate font-display text-lg font-bold">@{user.username}</p>
+          <p className="text-xs font-semibold text-muted-foreground">
+            Inscrit le {format(new Date(user.created_at), "d MMM yyyy", { locale: fr })}
+            {" · "}
+            {user.parental_consent ? "Accord parental donné" : "Sans accord parental"}
+          </p>
+          {missingConsent && (
+            <p className="mt-1 flex items-center gap-1 text-xs font-bold text-destructive">
+              <AlertTriangle className="h-3.5 w-3.5" /> Moins de 13 ans sans accord parental
+            </p>
+          )}
+        </div>
+      </Link>
+
+      <div className="flex items-center gap-3">
+        <span className="whitespace-nowrap rounded-full border-[2.5px] border-ink bg-secondary px-3 py-1 font-display font-bold">
+          {age ?? "?"} ans
+        </span>
+        <form
+          className="flex items-center gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            save.mutate();
+          }}
+        >
+          <Input
+            type="date"
+            aria-label={`Date de naissance de ${user.username}`}
+            value={date}
+            max={today}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-40"
+          />
+          <Button type="submit" size="sm" disabled={!changed || !valid || save.isPending} aria-label="Enregistrer la date">
+            <Check />
+            {changed && newAge !== null ? `${newAge} ans` : "OK"}
+          </Button>
+        </form>
+      </div>
+    </li>
+  );
+}

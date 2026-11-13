@@ -1,7 +1,7 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Paintbrush, Plus, Settings, User } from "lucide-react";
-import { meQuery } from "@/lib/queries";
+import { Home, Paintbrush, Plus, Settings, ShieldCheck, User } from "lucide-react";
+import { isAdminQuery, meQuery } from "@/lib/queries";
 import { Logo } from "./Logo";
 import { KidAvatar } from "./Avatar";
 import { SiteFooter } from "./SiteFooter";
@@ -12,6 +12,7 @@ const navActive = { className: "bg-secondary border-[2.5px] border-ink shadow-st
 
 export function AppShell() {
   const { data: me } = useQuery(meQuery);
+  const { data: isAdmin } = useQuery(isAdminQuery);
   return (
     <div className="min-h-screen pb-24 md:pb-0">
       <header className="sticky top-0 z-30 border-b-[3px] border-ink bg-background/95 backdrop-blur">
@@ -27,8 +28,22 @@ export function AppShell() {
             <Link to="/parametres" className={navClass} activeProps={navActive}>
               <Settings className="h-4 w-4" /> Réglages
             </Link>
+            {isAdmin && (
+              <Link to="/admin" className={navClass} activeProps={navActive}>
+                <ShieldCheck className="h-4 w-4" /> Admin
+              </Link>
+            )}
           </nav>
           <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Link
+                to="/admin"
+                aria-label="Administration"
+                className="grid h-11 w-11 place-items-center rounded-full border-[2.5px] border-ink bg-accent text-accent-foreground shadow-sticker-sm md:hidden"
+              >
+                <ShieldCheck className="h-5 w-5" />
+              </Link>
+            )}
             <Link
               to="/studio/$drawingId"
               params={{ drawingId: "nouveau" }}
