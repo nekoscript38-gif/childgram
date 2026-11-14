@@ -43,6 +43,13 @@
       "when": 1794565732385,
       "tag": "0005_fix_comment_block_reason_allowed",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794678758518,
+      "tag": "0006_minimum_signup_age_four",
+      "breakpoints": true
     }
   ]
 }

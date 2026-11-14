@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, canCommentBetween, isValidBirthDate, isValidUsername, needsParentalConsent, sameAgeGroup, usernameToAuthEmail } from "./rules";
+import { ageOn, canCommentBetween, isOldEnoughToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, sameAgeGroup, usernameToAuthEmail } from "./rules";
 import { AVATARS } from "./avatars";
 import { BRUSH_SIZES, PALETTE } from "./palette";
 
@@ -83,5 +83,17 @@ describe("under-9 comment block", () => {
   });
   it("still blocks 14+ from commenting a 10-year-old", () => {
     expect(canCommentBetween(15, 10)).toBe(false);
+  });
+});
+
+describe("minimum sign-up age", () => {
+  it("refuses a 3-year-old", () => {
+    expect(isOldEnoughToSignUp("2023-01-01", today)).toBe(false);
+  });
+  it("refuses the day before the 4th birthday", () => {
+    expect(isOldEnoughToSignUp("2022-11-13", today)).toBe(false);
+  });
+  it("accepts a child on their 4th birthday", () => {
+    expect(isOldEnoughToSignUp("2022-11-12", today)).toBe(true);
   });
 });
