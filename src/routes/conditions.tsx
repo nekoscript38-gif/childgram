@@ -15,7 +15,7 @@ export const Route = createFileRoute("/conditions")({
 
 function Terms() {
   return (
-    <LegalLayout title="Conditions d'utilisation" updated="12 novembre 2026">
+    <LegalLayout title="Conditions d'utilisation" updated="14 novembre 2026">
       <p>
         Bienvenue sur ChildGram ! ChildGram est une plateforme où les enfants peuvent dessiner, publier leurs dessins sur leur profil
         et les partager avec d'autres enfants, qui peuvent leur envoyer des cœurs et des commentaires. En créant un compte ou en
@@ -24,6 +24,10 @@ function Terms() {
 
       <h2>1. Qui peut créer un compte ?</h2>
       <ul>
+        <li>
+          <strong>À partir de 4 ans :</strong> ChildGram est fait pour les enfants de <strong>moyenne section de maternelle et plus</strong>,
+          pas pour les tout-petits ni les bébés. Il n'est pas possible de créer un compte pour un enfant de moins de 4 ans.
+        </li>
         <li>
           <strong>Moins de 13 ans :</strong> tout utilisateur de moins de 13 ans doit disposer d'une <strong>autorisation parentale formelle</strong>.
           Le compte doit être <strong>ouvert par un parent ou un représentant légal</strong>, qui le confirme lors de l'inscription.

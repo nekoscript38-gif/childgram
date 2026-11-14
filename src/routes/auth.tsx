@@ -12,8 +12,10 @@ import { Logo } from "@/components/childgram/Logo";
 import { AvatarPicker } from "@/components/childgram/AvatarPicker";
 import {
   BIO_MAX,
+  MIN_SIGNUP_AGE,
   PASSWORD_MIN,
   ageOn,
+  isOldEnoughToSignUp,
   isValidUsername,
   needsParentalConsent,
   usernameToAuthEmail,
@@ -180,6 +182,8 @@ function SignupForm({ onDone }: { onDone: () => void }) {
       { toast.error(`Ton mot de passe doit faire au moins ${PASSWORD_MIN} caractères`); return; }
     if (password !== password2) { toast.error("Les deux mots de passe ne sont pas pareils"); return; }
     if (!birthDate || Number.isNaN(age) || birthDate > today) { toast.error("Indique une date de naissance valide"); return; }
+    if (!isOldEnoughToSignUp(birthDate))
+      { toast.error(`ChildGram est pour les enfants de ${MIN_SIGNUP_AGE} ans et plus (moyenne section et plus)`); return; }
     if (underAge && !parentConsent)
       { toast.error("Avant 13 ans, c'est un parent ou un représentant légal qui doit ouvrir le compte"); return; }
     if (!terms) { toast.error("Il faut accepter les conditions d'utilisation et la politique de confidentialité"); return; }
@@ -202,7 +206,8 @@ function SignupForm({ onDone }: { onDone: () => void }) {
     setLoading(false);
     if (error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes("already")) toast.error("Ce pseudo est déjà pris, choisis-en un autre");
+      if (msg.includes("too_young")) toast.error(`ChildGram est pour les enfants de ${MIN_SIGNUP_AGE} ans et plus (moyenne section et plus)`);
+      else if (msg.includes("already")) toast.error("Ce pseudo est déjà pris, choisis-en un autre");
       else if (msg.includes("pwned") || msg.includes("weak") || msg.includes("known"))
         toast.error("Ce mot de passe est trop facile à deviner, choisis-en un autre");
       else toast.error("Impossible de créer le compte. Vérifie les informations et réessaie.");
@@ -251,6 +256,11 @@ function SignupForm({ onDone }: { onDone: () => void }) {
         <Label htmlFor="su-birth" className="font-display text-base font-bold">3. Ta date de naissance</Label>
         <Input id="su-birth" type="date" max={today} value={birthDate} onChange={(e) => setBirthDate(e.target.value)} required />
         <p className="text-xs font-semibold text-muted-foreground">Elle reste secrète : personne d'autre ne la voit.</p>
+        {birthDate && !Number.isNaN(age) && age < MIN_SIGNUP_AGE && (
+          <p className="text-sm font-bold text-destructive">
+            ChildGram est pour les enfants de {MIN_SIGNUP_AGE} ans et plus (moyenne section et plus).
+          </p>
+        )}
       </div>
 
       <div className="space-y-3">

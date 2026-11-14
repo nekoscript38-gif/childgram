@@ -6,6 +6,8 @@ export const BIO_MAX = 200;
 export const COMMENT_MAX = 300;
 export const TITLE_MAX = 60;
 export const PASSWORD_MIN = 8;
+/** Below this age sign-up is refused (blocks fake "baby" accounts). Mirrors handle_new_user. */
+export const MIN_SIGNUP_AGE = 4;
 
 export function isValidUsername(username: string) {
   return USERNAME_RE.test(username.trim());
@@ -30,6 +32,12 @@ export function ageOn(birthDate: string, today: Date = new Date()) {
 export function needsParentalConsent(birthDate: string, today: Date = new Date()) {
   const age = ageOn(birthDate, today);
   return Number.isNaN(age) || age < PARENTAL_CONSENT_AGE;
+}
+
+/** Sign-up is only open from MIN_SIGNUP_AGE (moyenne section) onwards. */
+export function isOldEnoughToSignUp(birthDate: string, today: Date = new Date()) {
+  const age = ageOn(birthDate, today);
+  return !Number.isNaN(age) && age >= MIN_SIGNUP_AGE;
 }
 
 /** A birth date must be a real day, not in the future, and at most 120 years ago. */
