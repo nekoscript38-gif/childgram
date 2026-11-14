@@ -1,7 +1,8 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Home, Paintbrush, Plus, Settings, ShieldCheck, User } from "lucide-react";
-import { isAdminQuery, meQuery } from "@/lib/queries";
+import { isAdminQuery, meQuery, myPrivateQuery } from "@/lib/queries";
+import { BannedBanner } from "./BannedNotice";
 import { Logo } from "./Logo";
 import { KidAvatar } from "./Avatar";
 import { SiteFooter } from "./SiteFooter";
@@ -13,6 +14,8 @@ const navActive = { className: "bg-secondary border-[2.5px] border-ink shadow-st
 export function AppShell() {
   const { data: me } = useQuery(meQuery);
   const { data: isAdmin } = useQuery(isAdminQuery);
+  const { data: priv } = useQuery(myPrivateQuery);
+  const banned = !!priv?.banned_at;
   return (
     <div className="min-h-screen pb-24 md:pb-0">
       <header className="sticky top-0 z-30 border-b-[3px] border-ink bg-background/95 backdrop-blur">
@@ -44,13 +47,13 @@ export function AppShell() {
                 <ShieldCheck className="h-5 w-5" />
               </Link>
             )}
-            <Link
+            {!banned && <Link
               to="/studio/$drawingId"
               params={{ drawingId: "nouveau" }}
               className="hidden h-11 items-center gap-2 rounded-full border-[2.5px] border-ink bg-primary px-5 font-display font-bold text-primary-foreground shadow-sticker transition-transform hover:-translate-y-0.5 md:inline-flex"
             >
               <Plus className="h-4 w-4" strokeWidth={3} /> Dessiner
-            </Link>
+            </Link>}
             {me && (
               <Link to="/profil/$username" params={{ username: me.username }} aria-label="Mon profil">
                 <KidAvatar avatarId={me.avatar_id} size={44} className="shadow-sticker-sm" />
@@ -61,6 +64,7 @@ export function AppShell() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6">
+        {banned && <BannedBanner self className="mb-6" />}
         <Outlet />
       </main>
 
@@ -74,14 +78,18 @@ export function AppShell() {
       >
         <BottomLink to="/fil" label="Fil" icon={<Home className="h-5 w-5" />} />
         <BottomLink to="/studio" label="Studio" icon={<Paintbrush className="h-5 w-5" />} exact />
-        <Link
-          to="/studio/$drawingId"
-          params={{ drawingId: "nouveau" }}
-          aria-label="Nouveau dessin"
-          className="-mt-8 grid h-16 w-16 place-items-center rounded-full border-[3px] border-ink bg-primary text-primary-foreground shadow-sticker"
-        >
-          <Plus className="h-7 w-7" strokeWidth={3} />
-        </Link>
+        {banned ? (
+          <span className="w-16" />
+        ) : (
+          <Link
+            to="/studio/$drawingId"
+            params={{ drawingId: "nouveau" }}
+            aria-label="Nouveau dessin"
+            className="-mt-8 grid h-16 w-16 place-items-center rounded-full border-[3px] border-ink bg-primary text-primary-foreground shadow-sticker"
+          >
+            <Plus className="h-7 w-7" strokeWidth={3} />
+          </Link>
+        )}
         {me ? (
           <Link
             to="/profil/$username"

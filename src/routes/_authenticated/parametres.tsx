@@ -41,6 +41,7 @@ function Settings() {
   const navigate = useNavigate();
   const [avatarId, setAvatarId] = useState(me?.avatar_id ?? 1);
   const [bio, setBio] = useState(me?.bio ?? "");
+  const banned = !!priv?.banned_at;
 
   const save = useMutation({
     mutationFn: async () => {
@@ -49,6 +50,8 @@ function Settings() {
         .update({ avatar_id: avatarId, bio: bio.trim().slice(0, BIO_MAX) })
         .eq("id", me!.id);
       if (error) throw new Error("Impossible d'enregistrer");
+      // A banned profile matches no row (RLS), so nothing is saved.
+      if (banned) throw new Error("Ton profil est banni : tu ne peux plus le modifier.");
     },
     onSuccess: () => {
       toast.success("Profil mis à jour !");
@@ -80,6 +83,12 @@ function Settings() {
             <p className="text-sm font-semibold text-muted-foreground">Ton pseudo ne peut pas être changé.</p>
           </div>
         </div>
+        {banned && (
+          <p className="rounded-2xl border-[2.5px] border-ink bg-destructive p-3 font-bold text-destructive-foreground">
+            Ton profil est banni : tu ne peux plus changer ton avatar ni ta bio.
+          </p>
+        )}
+        <fieldset disabled={banned} className="space-y-5 disabled:opacity-60">
         <div className="space-y-3">
           <Label className="font-display text-base font-bold">Ton avatar</Label>
           <AvatarPicker value={avatarId} onChange={setAvatarId} />
@@ -92,9 +101,10 @@ function Settings() {
             <span>{bio.length}/{BIO_MAX}</span>
           </div>
         </div>
-        <Button onClick={() => save.mutate()} disabled={save.isPending}>
+        <Button onClick={() => save.mutate()} disabled={banned || save.isPending}>
           <Save /> {save.isPending ? "Enregistrement…" : "Enregistrer"}
         </Button>
+        </fieldset>
       </section>
 
       <section className="sticker space-y-2 p-5">

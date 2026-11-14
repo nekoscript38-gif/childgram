@@ -181,7 +181,11 @@ function DrawingPage() {
           {drawing.is_published && !canComment && (
             <p className="flex items-start gap-2 rounded-2xl border-[2.5px] border-ink bg-secondary p-3 text-sm font-bold">
               <Lock className="h-4 w-4 shrink-0" />
-              {blockReason === "self_too_young"
+              {blockReason === "self_banned"
+                ? "Ton profil a été banni : tu ne peux plus envoyer de commentaires."
+                : blockReason === "author_banned"
+                  ? "Ce profil a été banni : on ne peut plus commenter ses dessins."
+                  : blockReason === "self_too_young"
                 ? "Les commentaires s'ouvriront pour toi à tes 9 ans. En attendant, tu peux envoyer des cœurs !"
                 : blockReason === "author_too_young"
                   ? "Cet artiste a moins de 9 ans : ses dessins ne reçoivent pas de commentaires. Tu peux quand même lui envoyer un cœur !"

@@ -5,11 +5,15 @@ import { Heart, MessageCircle, Pencil, Plus } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { myDrawingsQuery } from "@/lib/queries";
+import { myDrawingsQuery, myPrivateQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/studio/")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(myDrawingsQuery),
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(myDrawingsQuery),
+      context.queryClient.ensureQueryData(myPrivateQuery),
+    ]),
   head: () => ({
     meta: [
       { title: "Mon studio — ChildGram" },
@@ -25,6 +29,8 @@ export const Route = createFileRoute("/_authenticated/studio/")({
 
 function StudioList() {
   const { data: drawings } = useSuspenseQuery(myDrawingsQuery);
+  const { data: priv } = useSuspenseQuery(myPrivateQuery);
+  const banned = !!priv?.banned_at;
 
   return (
     <div className="space-y-8">
@@ -33,11 +39,13 @@ function StudioList() {
           <h1 className="text-4xl font-extrabold sm:text-5xl">Mon studio</h1>
           <p className="mt-1 font-semibold text-muted-foreground">Tes brouillons et tes dessins publiés.</p>
         </div>
-        <Button asChild size="lg">
-          <Link to="/studio/$drawingId" params={{ drawingId: "nouveau" }}>
-            <Plus /> Nouveau dessin
-          </Link>
-        </Button>
+        {!banned && (
+          <Button asChild size="lg">
+            <Link to="/studio/$drawingId" params={{ drawingId: "nouveau" }}>
+              <Plus /> Nouveau dessin
+            </Link>
+          </Button>
+        )}
       </div>
 
       {drawings.length === 0 ? (
