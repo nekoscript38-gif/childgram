@@ -5,20 +5,24 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertTriangle, Check, Search, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Ban, Check, Search, ShieldCheck, Undo2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KidAvatar } from "@/components/childgram/Avatar";
-import { adminUsersQuery, isAdminQuery, type AdminUserRow } from "@/lib/queries";
-import { ageOn, isValidBirthDate, needsParentalConsent } from "@/lib/rules";
+import { adminUsersQuery, isAdminQuery, meQuery, type AdminUserRow } from "@/lib/queries";
+import { ageOn, effectiveAge, isAllowedAdminBirthDate, needsParentalConsent } from "@/lib/rules";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async ({ context }) => {
     const isAdmin = await context.queryClient.ensureQueryData(isAdminQuery);
     if (!isAdmin) throw redirect({ to: "/fil" });
   },
-  loader: ({ context }) => context.queryClient.ensureQueryData(adminUsersQuery),
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(adminUsersQuery),
+      context.queryClient.ensureQueryData(meQuery),
+    ]),
   head: () => ({
     meta: [
       { title: "Administration — ChildGram" },
@@ -33,6 +37,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminPage() {
   const { data: users } = useSuspenseQuery(adminUsersQuery);
+  const { data: me } = useSuspenseQuery(meQuery);
   const [q, setQ] = useState("");
   const filtered = useMemo(
     () => users.filter((u) => u.username.toLowerCase().includes(q.trim().toLowerCase())),
@@ -48,6 +53,7 @@ function AdminPage() {
           </h1>
           <p className="mt-1 font-semibold text-muted-foreground">
             {users.length} compte{users.length > 1 ? "s" : ""}. Les dates de naissance ne sont visibles que par toi.
+            {" "}« Mettre à 0 an » bannit un profil jusqu'à ce que tu remontes son âge.
           </p>
         </div>
         <div className="relative w-full sm:w-64">
@@ -58,7 +64,7 @@ function AdminPage() {
 
       <ul className="space-y-4">
         {filtered.map((u) => (
-          <UserRow key={u.id} user={u} />
+          <UserRow key={u.id} user={u} isMe={u.id === me?.id} />
         ))}
         {filtered.length === 0 && (
           <li className="sticker p-6 text-center font-bold">Aucun compte trouvé.</li>
@@ -68,19 +74,20 @@ function AdminPage() {
   );
 }
 
-function UserRow({ user }: { user: AdminUserRow }) {
+function UserRow({ user, isMe }: { user: AdminUserRow; isMe: boolean }) {
   const qc = useQueryClient();
   const [date, setDate] = useState(user.birth_date ?? "");
   const changed = date !== (user.birth_date ?? "");
-  const valid = isValidBirthDate(date);
-  const age = user.birth_date ? ageOn(user.birth_date) : null;
+  const valid = isAllowedAdminBirthDate(date);
+  const banned = !!user.banned_at;
+  const age = user.birth_date ? effectiveAge(user.birth_date, user.banned_at) : null;
   const newAge = valid ? ageOn(date) : null;
   const missingConsent = user.birth_date && needsParentalConsent(user.birth_date) && !user.parental_consent;
   const today = format(new Date(), "yyyy-MM-dd");
 
   const save = useMutation({
     mutationFn: async () => {
-      if (!isValidBirthDate(date)) throw new Error("Date de naissance invalide");
+      if (!isAllowedAdminBirthDate(date)) throw new Error("Date invalide (pour 0 an, utilise « Mettre à 0 an »)");
       const { data, error } = await supabase
         .from("profile_private")
         .update({ birth_date: date })
@@ -97,8 +104,26 @@ function UserRow({ user }: { user: AdminUserRow }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const setBan = useMutation({
+    mutationFn: async (ban: boolean) => {
+      const { data, error } = await supabase
+        .from("profile_private")
+        .update({ banned_at: ban ? new Date().toISOString() : null })
+        .eq("user_id", user.id)
+        .select("user_id");
+      if (error || !data?.length) throw new Error("Impossible de changer le statut de ce profil");
+    },
+    onSuccess: (_d, ban) => {
+      toast.success(ban ? `@${user.username} est à 0 an : profil banni` : `Âge de @${user.username} remonté`);
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["feed"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
-    <li className="sticker flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
+    <li className={`sticker flex flex-col gap-4 p-4 sm:flex-row sm:items-center ${banned ? "border-destructive" : ""}`}>
       <Link to="/profil/$username" params={{ username: user.username }} className="flex min-w-0 flex-1 items-center gap-3">
         <KidAvatar avatarId={user.avatar_id} size={52} />
         <div className="min-w-0">
@@ -108,6 +133,11 @@ function UserRow({ user }: { user: AdminUserRow }) {
             {" · "}
             {user.parental_consent ? "Accord parental donné" : "Sans accord parental"}
           </p>
+          {banned && (
+            <p className="mt-1 flex items-center gap-1 text-xs font-bold text-destructive">
+              <Ban className="h-3.5 w-3.5" /> Profil banni (0 an) depuis le {format(new Date(user.banned_at!), "d MMM yyyy", { locale: fr })}
+            </p>
+          )}
           {missingConsent && (
             <p className="mt-1 flex items-center gap-1 text-xs font-bold text-destructive">
               <AlertTriangle className="h-3.5 w-3.5" /> Moins de 13 ans sans accord parental
@@ -116,9 +146,11 @@ function UserRow({ user }: { user: AdminUserRow }) {
         </div>
       </Link>
 
-      <div className="flex items-center gap-3">
-        <span className="whitespace-nowrap rounded-full border-[2.5px] border-ink bg-secondary px-3 py-1 font-display font-bold">
-          {age ?? "?"} ans
+      <div className="flex flex-wrap items-center gap-3">
+        <span
+          className={`whitespace-nowrap rounded-full border-[2.5px] border-ink px-3 py-1 font-display font-bold ${banned ? "bg-destructive text-destructive-foreground" : "bg-secondary"}`}
+        >
+          {age ?? "?"} an{age !== null && age > 1 ? "s" : ""}
         </span>
         <form
           className="flex items-center gap-2"
@@ -140,6 +172,32 @@ function UserRow({ user }: { user: AdminUserRow }) {
             {changed && newAge !== null ? `${newAge} ans` : "OK"}
           </Button>
         </form>
+        {!isMe &&
+          (banned ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={setBan.isPending}
+              onClick={() => setBan.mutate(false)}
+            >
+              <Undo2 /> Remonter à {user.birth_date ? ageOn(user.birth_date) : "?"} ans
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              variant="destructive"
+              disabled={setBan.isPending}
+              onClick={() => {
+                if (window.confirm(`Mettre @${user.username} à 0 an ? Son profil sera banni jusqu'à ce que tu remontes son âge.`)) {
+                  setBan.mutate(true);
+                }
+              }}
+            >
+              <Ban /> Mettre à 0 an
+            </Button>
+          ))}
       </div>
     </li>
   );
