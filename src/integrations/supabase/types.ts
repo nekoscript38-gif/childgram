@@ -129,18 +129,21 @@ export type Database = {
       }
       profile_private: {
         Row: {
+          banned_at: string | null
           birth_date: string
           parental_consent: boolean
           terms_accepted_at: string
           user_id: string
         }
         Insert: {
+          banned_at?: string | null
           birth_date: string
           parental_consent?: boolean
           terms_accepted_at?: string
           user_id: string
         }
         Update: {
+          banned_at?: string | null
           birth_date?: string
           parental_consent?: boolean
           terms_accepted_at?: string
@@ -212,6 +215,10 @@ export type Database = {
         Args: { p: Database["public"]["Tables"]["profiles"]["Row"] }
         Returns: number
       }
+      effective_age: {
+        Args: { _banned_at: string; _birth: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -219,6 +226,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_banned: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin"
