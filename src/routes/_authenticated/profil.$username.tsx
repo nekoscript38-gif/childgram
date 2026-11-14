@@ -5,6 +5,8 @@ import { Cake, Heart, Images, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KidAvatar } from "@/components/childgram/Avatar";
 import { DrawingCard } from "@/components/childgram/DrawingCard";
+import { BannedBanner } from "@/components/childgram/BannedNotice";
+import { isBannedAge } from "@/lib/rules";
 import { meQuery, myHeartsQuery, profileQuery } from "@/lib/queries";
 
 export const Route = createFileRoute("/_authenticated/profil/$username")({
@@ -44,20 +46,24 @@ function ProfilePage() {
   const liked = new Set(hearts);
   const totalHearts = drawings.reduce((s, d) => s + (d.hearts?.[0]?.count ?? 0), 0);
   const isMe = me?.id === profile.id;
+  const banned = isBannedAge(profile.current_age);
 
   return (
     <div className="space-y-10">
+      {banned && <BannedBanner self={isMe} />}
       <section className="sticker-lg flex flex-col items-center gap-5 p-6 text-center sm:flex-row sm:text-left">
         <KidAvatar avatarId={profile.avatar_id} size={128} className="border-[3px] shadow-sticker" />
         <div className="flex-1 space-y-2">
           <h1 className="text-4xl font-extrabold">@{profile.username}</h1>
-          {profile.bio ? (
+          {banned ? (
+            <p className="font-bold text-destructive">Profil banni</p>
+          ) : profile.bio ? (
             <p className="max-w-xl whitespace-pre-wrap font-semibold text-muted-foreground">{profile.bio}</p>
           ) : (
             <p className="font-semibold text-muted-foreground">Pas encore de bio.</p>
           )}
           <div className="flex flex-wrap justify-center gap-2 pt-1 sm:justify-start">
-            {profile.current_age !== null && (
+            {profile.current_age !== null && !banned && (
               <span className="flex items-center gap-1.5 rounded-full border-[2.5px] border-ink bg-accent px-3 py-1 font-display font-bold text-accent-foreground">
                 <Cake className="h-4 w-4" /> {profile.current_age} an{profile.current_age > 1 ? "s" : ""}
               </span>
@@ -70,7 +76,7 @@ function ProfilePage() {
             </span>
           </div>
         </div>
-        {isMe && (
+        {isMe && !banned && (
           <Button asChild variant="outline">
             <Link to="/parametres">
               <Pencil /> Modifier mon profil
@@ -85,7 +91,7 @@ function ProfilePage() {
           <p className="mt-2 font-display text-xl font-bold">
             {isMe ? "Tu n'as encore rien publié." : "Aucun dessin publié pour l'instant."}
           </p>
-          {isMe && (
+          {isMe && !banned && (
             <Button asChild className="mt-4">
               <Link to="/studio/$drawingId" params={{ drawingId: "nouveau" }}>Je dessine</Link>
             </Button>

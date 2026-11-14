@@ -56,7 +56,7 @@ export const myPrivateQuery = queryOptions({
     // maybeSingle() would fail with "multiple rows" for them.
     const { data, error } = await supabase
       .from("profile_private")
-      .select("birth_date,parental_consent,terms_accepted_at")
+      .select("birth_date,parental_consent,terms_accepted_at,banned_at")
       .eq("user_id", u.user.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -162,6 +162,7 @@ export type AdminUserRow = {
   created_at: string;
   birth_date: string | null;
   parental_consent: boolean;
+  banned_at: string | null;
 };
 
 export const adminUsersQuery = queryOptions({
@@ -169,7 +170,7 @@ export const adminUsersQuery = queryOptions({
   queryFn: async () => {
     const [{ data: profiles, error: e1 }, { data: priv, error: e2 }] = await Promise.all([
       supabase.from("profiles").select("id,username,avatar_id,created_at").order("created_at", { ascending: false }),
-      supabase.from("profile_private").select("user_id,birth_date,parental_consent"),
+      supabase.from("profile_private").select("user_id,birth_date,parental_consent,banned_at"),
     ]);
     if (e1) throw new Error(e1.message);
     if (e2) throw new Error(e2.message);
@@ -178,6 +179,7 @@ export const adminUsersQuery = queryOptions({
       ...p,
       birth_date: byId.get(p.id)?.birth_date ?? null,
       parental_consent: byId.get(p.id)?.parental_consent ?? false,
+      banned_at: byId.get(p.id)?.banned_at ?? null,
     }));
   },
 });
@@ -235,7 +237,14 @@ export const editableDrawingQuery = (id: string) =>
   });
 
 /** Why a comment is blocked (null when allowed). Real enforcement is the comments RLS policy. */
-export type CommentBlockReason = "self_too_young" | "author_too_young" | "other_group" | "unknown" | null;
+export type CommentBlockReason =
+  | "self_banned"
+  | "author_banned"
+  | "self_too_young"
+  | "author_too_young"
+  | "other_group"
+  | "unknown"
+  | null;
 
 /** Age barrier: under-9 kids get no comments; 9-13 and 14+ can't comment on each other (enforced by RLS). */
 export const canCommentQuery = (drawingId: string) =>
@@ -247,3 +256,4 @@ export const canCommentQuery = (drawingId: string) =>
       return (data ?? null) as CommentBlockReason;
     },
   });
+

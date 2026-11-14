@@ -50,6 +50,20 @@
       "when": 1794678758518,
       "tag": "0006_minimum_signup_age_four",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794683231447,
+      "tag": "0007_admin_soft_ban_age_zero",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794683256706,
+      "tag": "0008_ban_guardrails",
+      "breakpoints": true
     }
   ]
 }

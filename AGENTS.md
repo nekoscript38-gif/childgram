@@ -40,3 +40,4 @@ use the editor.
 - All social pages live under `src/routes/_authenticated/` (client-only); content is never visible signed-out, for child safety.
 - Embeds from `drawings` to `profiles` must name `drawings_user_id_fkey`, because `hearts`/`comments` make the relation ambiguous.
 - Comment age barrier: the comments INSERT policy calls `can_comment_on(drawing_id)` (SECURITY DEFINER, mirrors `canCommentBetween` in `src/lib/rules.ts`: `MIN_COMMENT_AGE` floor + `AGE_BARRIER` split), so the rule holds even if the UI is bypassed; the UI reads `comment_block_reason()` only to pick the message.
+- Soft-ban: `profile_private.banned_at` (admin-only update) freezes the age at 0 via `effective_age()`, used by `current_age`, `can_comment_on` and `comment_block_reason`; `is_banned()` in drawings/profiles/hearts RLS blocks writes and hides a banned user's drawings from others. A real birth date can never give age 0 (trigger), so age 0 always means banned.

@@ -26,6 +26,7 @@ export function HeartButton({
       if (!u.user) throw new Error("Connecte-toi pour envoyer un cœur");
       if (next) {
         const { error } = await supabase.from("hearts").insert({ drawing_id: drawingId, user_id: u.user.id });
+        if (error?.code === "42501") throw new Error("Impossible d'envoyer un cœur : ce profil est banni.");
         if (error && error.code !== "23505") throw error;
       } else {
         const { error } = await supabase

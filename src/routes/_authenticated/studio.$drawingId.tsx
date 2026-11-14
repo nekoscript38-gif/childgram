@@ -1,12 +1,14 @@
 import { RouteError } from "@/components/childgram/RouteError";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { Ban } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 import { DrawingStudio } from "@/components/childgram/DrawingStudio";
-import { editableDrawingQuery } from "@/lib/queries";
+import { editableDrawingQuery, myPrivateQuery } from "@/lib/queries";
 
 export const Route = createFileRoute("/_authenticated/studio/$drawingId")({
   loader: async ({ context, params }) => {
+    await context.queryClient.ensureQueryData(myPrivateQuery);
     if (params.drawingId === "nouveau") return;
     const d = await context.queryClient.ensureQueryData(editableDrawingQuery(params.drawingId));
     if (!d) throw notFound();
@@ -31,6 +33,17 @@ export const Route = createFileRoute("/_authenticated/studio/$drawingId")({
 
 function StudioEditor() {
   const { drawingId } = Route.useParams();
+  const { data: priv } = useSuspenseQuery(myPrivateQuery);
+  if (priv?.banned_at) {
+    return (
+      <div className="sticker mx-auto max-w-md p-8 text-center">
+        <Ban className="mx-auto h-10 w-10 text-destructive" strokeWidth={3} />
+        <p className="mt-2 font-display text-2xl font-bold">Le studio est fermé pour ton compte.</p>
+        <p className="mt-1 font-semibold text-muted-foreground">Ton profil a été banni : tu ne peux plus dessiner ni publier.</p>
+        <Link to="/studio" className="mt-4 inline-block font-bold text-primary underline">Retour au studio</Link>
+      </div>
+    );
+  }
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
