@@ -75,6 +75,20 @@ function Terms() {
         ChildGram peut retirer un dessin, un commentaire ou suspendre un compte qui ne respecte pas ces règles, notamment pour protéger
         les enfants. Le propriétaire d'un dessin peut supprimer les commentaires reçus sur ce dessin.
       </p>
+      <p>
+        <strong>Profil mis à 0 an :</strong> l'administratrice de ChildGram peut corriger l'âge d'un profil, et le descendre à{" "}
+        <strong>0 an</strong> pour bloquer toute interaction (par exemple en cas de tricherie sur l'âge ou de faux profil). Un profil à 0 an
+        est banni :
+      </p>
+      <ul>
+        <li>il ne peut plus créer, modifier ni publier de dessins ;</li>
+        <li>il ne peut plus modifier son profil (avatar, bio) ;</li>
+        <li>il ne peut plus envoyer ni recevoir de cœurs ou de commentaires, et ses dessins ne sont plus montrés aux autres ;</li>
+        <li>son profil affiche publiquement « Profil banni » avec une bannière rouge.</li>
+      </ul>
+      <p>
+        Un profil à 0 an reste à 0 an, même après son anniversaire, jusqu'à ce que l'administratrice remonte son âge.
+      </p>
 
       <h2>7. Responsabilité</h2>
       <p>
