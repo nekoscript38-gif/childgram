@@ -257,8 +257,3 @@ export const canCommentQuery = (drawingId: string) =>
     },
   });
 
-/** True when the signed-in kid is soft-banned (age set to 0 by the admin). Enforced by RLS. */
-export const amIBannedQuery = queryOptions({
-  ...myPrivateQuery,
-  select: (p: Awaited<ReturnType<NonNullable<typeof myPrivateQuery.queryFn>>>) => !!p?.banned_at,
-});
