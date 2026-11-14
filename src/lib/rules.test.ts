@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, canCommentBetween, isOldEnoughToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, sameAgeGroup, usernameToAuthEmail } from "./rules";
+import { ageOn, canCommentBetween, effectiveAge, isAllowedAdminBirthDate, isOldEnoughToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, sameAgeGroup, usernameToAuthEmail } from "./rules";
 import { AVATARS } from "./avatars";
 import { BRUSH_SIZES, PALETTE } from "./palette";
 
@@ -95,5 +95,23 @@ describe("minimum sign-up age", () => {
   });
   it("accepts a child on their 4th birthday", () => {
     expect(isOldEnoughToSignUp("2022-11-12", today)).toBe(true);
+  });
+});
+
+describe("admin soft-ban (age 0)", () => {
+  it("a banned profile is 0 years old whatever its birth date", () => {
+    expect(effectiveAge("2010-06-01", "2026-11-14T19:00:00Z", today)).toBe(0);
+  });
+  it("stays at 0 years later, until the ban is lifted", () => {
+    expect(effectiveAge("2010-06-01", "2026-11-14T19:00:00Z", new Date(2031, 0, 1))).toBe(0);
+    expect(effectiveAge("2010-06-01", null, today)).toBe(16);
+  });
+  it("a banned profile can't comment or be commented", () => {
+    expect(canCommentBetween(effectiveAge("2010-06-01", "x", today), 16)).toBe(false);
+    expect(canCommentBetween(16, effectiveAge("2010-06-01", "x", today))).toBe(false);
+  });
+  it("the admin can't set a birth date giving 0 years", () => {
+    expect(isAllowedAdminBirthDate("2026-05-01", today)).toBe(false);
+    expect(isAllowedAdminBirthDate("2025-11-12", today)).toBe(true);
   });
 });

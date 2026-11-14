@@ -63,3 +63,19 @@ export function sameAgeGroup(ageA: number, ageB: number) {
 export function canCommentBetween(writerAge: number, authorAge: number) {
   return writerAge >= MIN_COMMENT_AGE && authorAge >= MIN_COMMENT_AGE && sameAgeGroup(writerAge, authorAge);
 }
+
+/**
+ * Admin soft-ban: a banned profile shows this age, frozen until the admin lifts the ban.
+ * Mirrors `effective_age()` in the database, which drives every age rule (comments included).
+ */
+export const BANNED_AGE = 0;
+export function effectiveAge(birthDate: string, bannedAt: string | null, today: Date = new Date()) {
+  return bannedAt ? BANNED_AGE : ageOn(birthDate, today);
+}
+export function isBannedAge(age: number | null | undefined) {
+  return age === BANNED_AGE;
+}
+/** Real birth dates must give at least 1 year: age 0 is reserved for the ban. */
+export function isAllowedAdminBirthDate(birthDate: string, today: Date = new Date()) {
+  return isValidBirthDate(birthDate, today) && ageOn(birthDate, today) > BANNED_AGE;
+}
