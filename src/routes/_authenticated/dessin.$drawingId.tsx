@@ -128,7 +128,7 @@ function DrawingPage() {
               drawingId={drawing.id}
               count={drawing.hearts?.[0]?.count ?? 0}
               liked={hearts.includes(drawing.id)}
-              disabled={!drawing.is_published}
+              disabled={!drawing.is_published || blockReason === "self_banned" || blockReason === "author_banned"}
             />
             {isOwner && (
               <Button asChild variant="outline">

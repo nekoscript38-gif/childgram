@@ -45,13 +45,13 @@ function Settings() {
 
   const save = useMutation({
     mutationFn: async () => {
+      // Real block is RLS: a banned profile's update matches no row.
+      if (banned) throw new Error("Ton profil est banni : tu ne peux plus le modifier.");
       const { error } = await supabase
         .from("profiles")
         .update({ avatar_id: avatarId, bio: bio.trim().slice(0, BIO_MAX) })
         .eq("id", me!.id);
       if (error) throw new Error("Impossible d'enregistrer");
-      // A banned profile matches no row (RLS), so nothing is saved.
-      if (banned) throw new Error("Ton profil est banni : tu ne peux plus le modifier.");
     },
     onSuccess: () => {
       toast.success("Profil mis à jour !");
