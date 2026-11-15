@@ -246,7 +246,7 @@ export type CommentBlockReason =
   | "unknown"
   | null;
 
-/** Age barrier: under-9 kids get no comments; 9-13 and 14+ can't comment on each other (enforced by RLS). */
+/** Age barrier by life stage (see canCommentBetween); enforced by the comments RLS policy. */
 export const canCommentQuery = (drawingId: string) =>
   queryOptions({
     queryKey: ["can-comment", drawingId],

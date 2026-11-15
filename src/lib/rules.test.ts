@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, canCommentBetween, effectiveAge, isAllowedAdminBirthDate, isOldEnoughToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, sameAgeGroup, usernameToAuthEmail } from "./rules";
+import { ageOn, canCommentBetween, effectiveAge, isAllowedAdminBirthDate, isOldEnoughToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
 import { AVATARS } from "./avatars";
 import { BRUSH_SIZES, PALETTE } from "./palette";
 
@@ -55,16 +55,38 @@ describe("admin birth date correction", () => {
 
 describe("age barrier for comments", () => {
   it("blocks a 14-year-old from commenting a 13-year-old", () => {
-    expect(sameAgeGroup(14, 13)).toBe(false);
+    expect(canCommentBetween(14, 13)).toBe(false);
   });
   it("blocks a 13-year-old from commenting a 14-year-old", () => {
-    expect(sameAgeGroup(13, 14)).toBe(false);
+    expect(canCommentBetween(13, 14)).toBe(false);
   });
-  it("allows two kids under 14", () => {
-    expect(sameAgeGroup(9, 13)).toBe(true);
+  it("allows two kids aged 9 to 13", () => {
+    expect(canCommentBetween(9, 13)).toBe(true);
   });
-  it("allows two users aged 14 and over", () => {
-    expect(sameAgeGroup(14, 18)).toBe(true);
+  it("allows two teens aged 14 to 17", () => {
+    expect(canCommentBetween(14, 17)).toBe(true);
+  });
+});
+
+describe("pré-adultes (18-20) and adults (21+)", () => {
+  it("lets a 16-year-old and a 19-year-old talk both ways", () => {
+    expect(canCommentBetween(16, 19)).toBe(true);
+    expect(canCommentBetween(19, 16)).toBe(true);
+  });
+  it("blocks a 17-year-old and a 21-year-old both ways", () => {
+    expect(canCommentBetween(17, 21)).toBe(false);
+    expect(canCommentBetween(21, 17)).toBe(false);
+  });
+  it("lets a 20-year-old and a 30-year-old talk", () => {
+    expect(canCommentBetween(20, 30)).toBe(true);
+    expect(canCommentBetween(30, 20)).toBe(true);
+  });
+  it("blocks a 13-year-old and an 18-year-old", () => {
+    expect(canCommentBetween(13, 18)).toBe(false);
+    expect(canCommentBetween(18, 13)).toBe(false);
+  });
+  it("allows two adults", () => {
+    expect(canCommentBetween(21, 45)).toBe(true);
   });
 });
 

@@ -52,16 +52,30 @@ export function isValidBirthDate(birthDate: string, today: Date = new Date()) {
   return date >= oldest;
 }
 
-/** Comments only flow between kids of the same group: 9 to 13, or 14 and older. */
-export const AGE_BARRIER = 14;
-/** Under this age a kid can neither write nor receive comments. */
+/**
+ * ChildGram life stages for comments (see the Terms):
+ * under 9 none, 9-13 (grand enfant / pré-ado), 14-17 (ado), 18-20 (pré-adulte), 21+ (adulte).
+ */
 export const MIN_COMMENT_AGE = 9;
-export function sameAgeGroup(ageA: number, ageB: number) {
-  return ageA >= AGE_BARRIER === ageB >= AGE_BARRIER;
+export const AGE_BARRIER = 14;
+export const PRE_ADULT_AGE = 18;
+export const ADULT_AGE = 21;
+export function commentAgeTier(age: number) {
+  if (Number.isNaN(age) || age < MIN_COMMENT_AGE) return 0;
+  if (age < AGE_BARRIER) return 1;
+  if (age < PRE_ADULT_AGE) return 2;
+  if (age < ADULT_AGE) return 3;
+  return 4;
 }
-/** Mirrors `can_comment_on` in the database, which is the real enforcement. */
+/**
+ * Same stage can talk; 14-17 with 18-20 and 18-20 with 21+ too; 9-13 stays among itself.
+ * Mirrors `ages_can_comment` in the database, which is the real enforcement.
+ */
 export function canCommentBetween(writerAge: number, authorAge: number) {
-  return writerAge >= MIN_COMMENT_AGE && authorAge >= MIN_COMMENT_AGE && sameAgeGroup(writerAge, authorAge);
+  const a = commentAgeTier(writerAge);
+  const b = commentAgeTier(authorAge);
+  if (a === 0 || b === 0) return false;
+  return a === b || (Math.min(a, b) >= 2 && Math.abs(a - b) === 1);
 }
 
 /**
