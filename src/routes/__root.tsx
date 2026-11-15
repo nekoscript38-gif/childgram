@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { isChunkLoadError, reloadForStaleChunk } from "@/lib/chunk-reload";
 
 function NotFoundComponent() {
   return (
@@ -38,9 +39,12 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
+  const staleChunk = isChunkLoadError(error);
   useEffect(() => {
+    // An old open page asking for files replaced by an update: reload once to get the new ones.
+    if (staleChunk && reloadForStaleChunk()) return;
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
+  }, [error, staleChunk]);
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
@@ -98,10 +102,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const STALE_PAGE_GUARD = `(function(){var re=/Importing a module script failed|Failed to fetch dynamically imported module|error loading dynamically imported module/i;function r(m){if(!re.test(String(m||"")))return;try{var k="childgram:chunk-reload-at",l=Number(sessionStorage.getItem(k)||0);if(Date.now()-l<15000)return;sessionStorage.setItem(k,String(Date.now()))}catch(e){}location.reload()}window.addEventListener("error",function(e){r(e&&(e.message||(e.error&&e.error.message)))});window.addEventListener("unhandledrejection",function(e){var x=e&&e.reason;r(x&&(x.message||x))})})();`;
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
       <head>
+        {/* Runs before the app's own files: if they fail to load (stale page after an update), reload once. */}
+        <script dangerouslySetInnerHTML={{ __html: STALE_PAGE_GUARD }} />
         <HeadContent />
       </head>
       <body>
@@ -125,6 +133,22 @@ function RootComponent() {
     });
     return () => data.subscription.unsubscribe();
   }, [queryClient, router]);
+
+  useEffect(() => {
+    const onPreloadError = (e: Event) => {
+      e.preventDefault();
+      reloadForStaleChunk();
+    };
+    const onRejection = (e: PromiseRejectionEvent) => {
+      if (isChunkLoadError(e.reason)) reloadForStaleChunk();
+    };
+    window.addEventListener("vite:preloadError", onPreloadError);
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => {
+      window.removeEventListener("vite:preloadError", onPreloadError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
