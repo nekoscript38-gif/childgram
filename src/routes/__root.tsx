@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { isChunkLoadError, reloadForStaleChunk } from "@/lib/chunk-reload";
 
 function NotFoundComponent() {
   return (
@@ -38,9 +39,12 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
+  const staleChunk = isChunkLoadError(error);
   useEffect(() => {
+    // An old open page asking for files replaced by an update: reload once to get the new ones.
+    if (staleChunk && reloadForStaleChunk()) return;
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
+  }, [error, staleChunk]);
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
@@ -125,6 +129,22 @@ function RootComponent() {
     });
     return () => data.subscription.unsubscribe();
   }, [queryClient, router]);
+
+  useEffect(() => {
+    const onPreloadError = (e: Event) => {
+      e.preventDefault();
+      reloadForStaleChunk();
+    };
+    const onRejection = (e: PromiseRejectionEvent) => {
+      if (isChunkLoadError(e.reason)) reloadForStaleChunk();
+    };
+    window.addEventListener("vite:preloadError", onPreloadError);
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => {
+      window.removeEventListener("vite:preloadError", onPreloadError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
