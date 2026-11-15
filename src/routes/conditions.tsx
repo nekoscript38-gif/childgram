@@ -15,7 +15,7 @@ export const Route = createFileRoute("/conditions")({
 
 function Terms() {
   return (
-    <LegalLayout title="Conditions d'utilisation" updated="14 novembre 2026">
+    <LegalLayout title="Conditions d'utilisation" updated="15 novembre 2026">
       <p>
         Bienvenue sur ChildGram ! ChildGram est une plateforme où les enfants peuvent dessiner, publier leurs dessins sur leur profil
         et les partager avec d'autres enfants, qui peuvent leur envoyer des cœurs et des commentaires. En créant un compte ou en
@@ -38,39 +38,83 @@ function Terms() {
         <li>Chaque compte est personnel. On ne partage pas son mot de passe avec d'autres enfants.</li>
       </ul>
 
-      <h2>2. Le compte</h2>
+      <h2>2. Les étapes de la vie selon ChildGram</h2>
+      <p>
+        Pour protéger chacun, ChildGram classe ses utilisateurs selon leur âge. Ces étapes décident qui peut créer un compte et qui
+        peut écrire des commentaires à qui. Les cœurs restent ouverts à tout le monde.
+      </p>
+      <ul>
+        <li>
+          <strong>Bébé (de 0 à 18 mois) :</strong> un bébé ne doit <strong>jamais</strong> être devant un écran, ni en contact direct avec un
+          écran. Cela peut entraîner un retard de développement. Un bébé n'a pas sa place sur ChildGram.
+        </li>
+        <li>
+          <strong>Pré-enfant (de 18 mois à l'anniversaire des 4 ans) :</strong> les écrans sont fortement déconseillés. La médecine
+          déconseille tout type d'écran à cet âge, c'est pourquoi un pré-enfant n'a pas sa place sur ChildGram.
+        </li>
+        <li>
+          <strong>Petit enfant (de 4 ans à l'anniversaire des 9 ans) :</strong> il peut utiliser un écran pour dessiner et être créatif,
+          mais il est vulnérable et facile à manipuler. C'est pour cela que les commentaires sont bloqués pour les comptes de cet âge :
+          ils ne peuvent ni en écrire ni en recevoir.
+        </li>
+        <li>
+          <strong>Grand enfant (9 à 12 ans) et pré-ado (12 à 14 ans), de 9 ans à l'anniversaire des 14 ans :</strong> aux yeux de
+          ChildGram, ils ont la même maturité et la même vulnérabilité. Ils peuvent donc communiquer entre eux, mais avec personne
+          d'autre. Tout compte de pré-ado qui se montre violent envers un compte de grand enfant sera <strong>banni</strong>.
+        </li>
+        <li>
+          <strong>Adolescent (de 14 ans à l'anniversaire des 18 ans) :</strong> assez mature pour parler librement avec les autres
+          adolescents et avec les pré-adultes. Les contacts avec les grands enfants, les pré-ados et tous les plus jeunes sont bloqués,
+          ainsi qu'avec les adultes de 21 ans et plus.
+        </li>
+        <li>
+          <strong>Pré-adulte (de 18 ans à l'anniversaire des 21 ans) :</strong> adulte parce qu'il est majeur, et « pré » parce que son
+          développement biologique et psychologique n'est pas encore terminé. Un pré-adulte peut communiquer avec les adolescents, les
+          autres pré-adultes et les adultes.
+        </li>
+        <li>
+          <strong>Adulte (21 ans et plus) :</strong> peut communiquer avec les pré-adultes et les autres adultes, mais jamais avec les
+          adolescents ni avec les plus jeunes.
+        </li>
+      </ul>
+      <p>
+        Ces barrières sont techniques : ChildGram les applique automatiquement, et personne ne peut les contourner, pas même
+        l'administratrice. L'âge pris en compte est l'âge actuel, calculé à partir de la date de naissance.
+      </p>
+
+      <h2>3. Le compte</h2>
       <ul>
         <li>On s'inscrit avec un pseudo et un mot de passe. Aucune adresse e-mail n'est demandée.</li>
         <li>Le profil contient un pseudo, une date de naissance (gardée secrète), une bio facultative et un avatar choisi parmi 20 images proposées.</li>
         <li>Pour la sécurité des enfants, il n'est pas possible d'importer sa propre photo ni de mettre un lien vers une image en avatar.</li>
       </ul>
 
-      <h2>3. Pas d'informations privées</h2>
+      <h2>4. Pas d'informations privées</h2>
       <p>
         ChildGram fait confiance à l'enfant et à ses parents pour <strong>ne jamais divulguer de données privées</strong>, ni sur lui-même, ni sur
         un autre enfant qu'il connaît. Cela veut dire : pas de vrai nom complet, pas d'adresse, pas de nom d'école, pas de numéro de
         téléphone, pas de photo, pas de réseau social, dans le pseudo, la bio, les titres, les dessins ou les commentaires.
       </p>
 
-      <h2>4. Les règles de gentillesse</h2>
+      <h2>5. Les règles de gentillesse</h2>
       <ul>
         <li>On publie uniquement ses propres dessins.</li>
         <li>On laisse des commentaires gentils et respectueux. Pas de moqueries, d'insultes ni de harcèlement.</li>
         <li>Pas de contenu violent, effrayant, choquant ou inapproprié pour des enfants.</li>
         <li>On ne donne jamais rendez-vous à quelqu'un rencontré sur ChildGram.</li>
         <li>
-          Les commentaires se font entre artistes du même âge : de 9 à 13 ans d'un côté, 14 ans et plus de l'autre. Avant 9 ans, on ne
-          peut ni écrire ni recevoir de commentaires, mais tout le monde peut envoyer des cœurs.
+          Les commentaires ne se font qu'entre étapes de la vie proches (voir la partie 2). Avant 9 ans, on ne peut ni écrire ni recevoir
+          de commentaires, mais tout le monde peut envoyer des cœurs.
         </li>
       </ul>
 
-      <h2>5. Tes dessins</h2>
+      <h2>6. Tes dessins</h2>
       <p>
         Tes dessins t'appartiennent. En les publiant, tu autorises ChildGram à les afficher aux autres utilisateurs connectés de la plateforme.
         Tu peux à tout moment retirer un dessin de ton profil ou le supprimer depuis ton studio.
       </p>
 
-      <h2>6. Modération</h2>
+      <h2>7. Modération</h2>
       <p>
         ChildGram peut retirer un dessin, un commentaire ou suspendre un compte qui ne respecte pas ces règles, notamment pour protéger
         les enfants. Le propriétaire d'un dessin peut supprimer les commentaires reçus sur ce dessin.
@@ -90,19 +134,19 @@ function Terms() {
         Un profil à 0 an reste à 0 an, même après son anniversaire, jusqu'à ce que l'administratrice remonte son âge.
       </p>
 
-      <h2>7. Responsabilité</h2>
+      <h2>8. Responsabilité</h2>
       <p>
         ChildGram fait de son mieux pour offrir un espace sûr et disponible, mais ne peut pas garantir l'absence totale d'interruptions ou
         d'erreurs. Les parents ou représentants légaux restent responsables de l'encadrement de l'enfant.
       </p>
 
-      <h2>8. Données personnelles</h2>
+      <h2>9. Données personnelles</h2>
       <p>
         La façon dont nous traitons les données est expliquée dans notre{" "}
         <Link to="/confidentialite" className="text-primary underline">politique de confidentialité</Link>.
       </p>
 
-      <h2>9. Changements</h2>
+      <h2>10. Changements</h2>
       <p>Ces conditions peuvent évoluer. En cas de changement important, nous l'indiquerons sur la plateforme.</p>
     </LegalLayout>
   );
