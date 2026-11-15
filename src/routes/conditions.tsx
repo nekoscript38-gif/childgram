@@ -68,7 +68,7 @@ function Terms() {
           ainsi qu'avec les adultes de 21 ans et plus.
         </li>
         <li>
-          <strong>Pré-adulte (de 18 ans à l'anniversaire des 21 ans) :</strong> adulte parce qu'il est majeur, et « pré » parce que son
+          <strong>Pré-adulte (de 18 ans à l'anniversaire des 21 ans) :</strong> adulte parce qu'il est majeur, et « pré » parce que son
           développement biologique et psychologique n'est pas encore terminé. Un pré-adulte peut communiquer avec les adolescents, les
           autres pré-adultes et les adultes.
         </li>
