@@ -93,3 +93,20 @@ export function isBannedAge(age: number | null | undefined) {
 export function isAllowedAdminBirthDate(birthDate: string, today: Date = new Date()) {
   return isValidBirthDate(birthDate, today) && ageOn(birthDate, today) > BANNED_AGE;
 }
+
+/**
+ * Private ban messaging: only between the admin and a banned profile, and only while it is banned.
+ * Mirrors the ban_messages INSERT policies, which are the real enforcement.
+ */
+export const BAN_MESSAGE_MAX = 1000;
+export function canSendBanMessage(opts: {
+  senderId: string;
+  senderIsAdmin: boolean;
+  conversationUserId: string;
+  conversationUserBanned: boolean;
+}) {
+  const { senderId, senderIsAdmin, conversationUserId, conversationUserBanned } = opts;
+  if (!conversationUserBanned) return false;
+  if (senderIsAdmin) return senderId !== conversationUserId;
+  return senderId === conversationUserId;
+}

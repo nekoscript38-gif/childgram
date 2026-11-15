@@ -133,6 +133,12 @@ function Terms() {
       <p>
         Un profil à 0 an reste à 0 an, même après son anniversaire, jusqu'à ce que l'administratrice remonte son âge.
       </p>
+      <p>
+        <strong>Messagerie privée :</strong> pendant le bannissement, une messagerie privée s'ouvre entre le profil banni et
+        l'administratrice, et seulement entre eux deux. L'administratrice y explique la raison du bannissement, et l'utilisateur peut y
+        répondre pour la contester. Cette messagerie n'existe pas pour les profils non bannis : elle se ferme pour l'utilisateur dès que
+        le bannissement est levé. L'administratrice garde l'historique de la conversation.
+      </p>
 
       <h2>8. Responsabilité</h2>
       <p>

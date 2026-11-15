@@ -29,6 +29,7 @@ function Privacy() {
         <li><strong>Autorisation parentale</strong> : pour les moins de 13 ans, nous enregistrons que le parent ou représentant légal a confirmé ouvrir le compte et donner son accord, ainsi que la date d'acceptation des conditions.</li>
         <li><strong>Bio et avatar</strong> : la bio facultative et l'avatar choisi parmi nos 20 images, visibles par les autres utilisateurs connectés.</li>
         <li><strong>Dessins, cœurs et commentaires</strong> : les brouillons ne sont visibles que par toi ; les dessins publiés, les cœurs et les commentaires sont visibles par les utilisateurs connectés.</li>
+        <li><strong>Messages en cas de bannissement</strong> : si un profil est banni, les messages échangés avec l'administratrice ne sont visibles que par ce profil (tant qu'il est banni) et par l'administratrice.</li>
       </ul>
       <p>
         Nous ne demandons <strong>pas d'adresse e-mail, pas de photo, pas de numéro de téléphone et pas de localisation</strong>. Il n'est pas

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, canCommentBetween, effectiveAge, isAllowedAdminBirthDate, isOldEnoughToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
+import { ageOn, canCommentBetween, canSendBanMessage, effectiveAge, isAllowedAdminBirthDate, isOldEnoughToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
 import { AVATARS } from "./avatars";
 import { BRUSH_SIZES, PALETTE } from "./palette";
 
@@ -135,5 +135,24 @@ describe("admin soft-ban (age 0)", () => {
   it("the admin can't set a birth date giving 0 years", () => {
     expect(isAllowedAdminBirthDate("2026-05-01", today)).toBe(false);
     expect(isAllowedAdminBirthDate("2025-11-12", today)).toBe(true);
+  });
+});
+
+describe("private ban messaging", () => {
+  const base = { senderId: "kid", senderIsAdmin: false, conversationUserId: "kid", conversationUserBanned: true };
+  it("a banned profile can write to the admin", () => {
+    expect(canSendBanMessage(base)).toBe(true);
+  });
+  it("a profile that is not banned can't use the messaging", () => {
+    expect(canSendBanMessage({ ...base, conversationUserBanned: false })).toBe(false);
+  });
+  it("a user can't write in another user's conversation", () => {
+    expect(canSendBanMessage({ ...base, senderId: "other" })).toBe(false);
+  });
+  it("the admin can write to a banned profile", () => {
+    expect(canSendBanMessage({ ...base, senderId: "admin", senderIsAdmin: true })).toBe(true);
+  });
+  it("the admin can't write to a profile that is not banned", () => {
+    expect(canSendBanMessage({ ...base, senderId: "admin", senderIsAdmin: true, conversationUserBanned: false })).toBe(false);
   });
 });

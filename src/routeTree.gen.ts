@@ -18,6 +18,8 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedFilRouteImport } from './routes/_authenticated/fil'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
 import { Route as AuthenticatedDessinDrawingIdRouteImport } from './routes/_authenticated/dessin.$drawingId'
+import { Route as AuthenticatedMessagerieIndexRouteImport } from './routes/_authenticated/messagerie.index'
+import { Route as AuthenticatedMessagerieUserIdRouteImport } from './routes/_authenticated/messagerie.$userId'
 import { Route as AuthenticatedProfilUsernameRouteImport } from './routes/_authenticated/profil.$username'
 import { Route as AuthenticatedStudioIndexRouteImport } from './routes/_authenticated/studio.index'
 import { Route as AuthenticatedStudioDrawingIdRouteImport } from './routes/_authenticated/studio.$drawingId'
@@ -67,6 +69,18 @@ const AuthenticatedDessinDrawingIdRoute =
     path: '/dessin/$drawingId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMessagerieIndexRoute =
+  AuthenticatedMessagerieIndexRouteImport.update({
+    id: '/messagerie/',
+    path: '/messagerie/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMessagerieUserIdRoute =
+  AuthenticatedMessagerieUserIdRouteImport.update({
+    id: '/messagerie/$userId',
+    path: '/messagerie/$userId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProfilUsernameRoute =
   AuthenticatedProfilUsernameRouteImport.update({
     id: '/profil/$username',
@@ -95,8 +109,10 @@ export interface FileRoutesByFullPath {
   '/fil': typeof AuthenticatedFilRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/dessin/$drawingId': typeof AuthenticatedDessinDrawingIdRoute
+  '/messagerie/$userId': typeof AuthenticatedMessagerieUserIdRoute
   '/profil/$username': typeof AuthenticatedProfilUsernameRoute
   '/studio/$drawingId': typeof AuthenticatedStudioDrawingIdRoute
+  '/messagerie/': typeof AuthenticatedMessagerieIndexRoute
   '/studio/': typeof AuthenticatedStudioIndexRoute
 }
 export interface FileRoutesByTo {
@@ -108,8 +124,10 @@ export interface FileRoutesByTo {
   '/fil': typeof AuthenticatedFilRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/dessin/$drawingId': typeof AuthenticatedDessinDrawingIdRoute
+  '/messagerie/$userId': typeof AuthenticatedMessagerieUserIdRoute
   '/profil/$username': typeof AuthenticatedProfilUsernameRoute
   '/studio/$drawingId': typeof AuthenticatedStudioDrawingIdRoute
+  '/messagerie': typeof AuthenticatedMessagerieIndexRoute
   '/studio': typeof AuthenticatedStudioIndexRoute
 }
 export interface FileRoutesById {
@@ -123,8 +141,10 @@ export interface FileRoutesById {
   '/_authenticated/fil': typeof AuthenticatedFilRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
   '/_authenticated/dessin/$drawingId': typeof AuthenticatedDessinDrawingIdRoute
+  '/_authenticated/messagerie/$userId': typeof AuthenticatedMessagerieUserIdRoute
   '/_authenticated/profil/$username': typeof AuthenticatedProfilUsernameRoute
   '/_authenticated/studio/$drawingId': typeof AuthenticatedStudioDrawingIdRoute
+  '/_authenticated/messagerie/': typeof AuthenticatedMessagerieIndexRoute
   '/_authenticated/studio/': typeof AuthenticatedStudioIndexRoute
 }
 export interface FileRouteTypes {
@@ -138,8 +158,10 @@ export interface FileRouteTypes {
     | '/fil'
     | '/parametres'
     | '/dessin/$drawingId'
+    | '/messagerie/$userId'
     | '/profil/$username'
     | '/studio/$drawingId'
+    | '/messagerie/'
     | '/studio/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -151,8 +173,10 @@ export interface FileRouteTypes {
     | '/fil'
     | '/parametres'
     | '/dessin/$drawingId'
+    | '/messagerie/$userId'
     | '/profil/$username'
     | '/studio/$drawingId'
+    | '/messagerie'
     | '/studio'
   id:
     | '__root__'
@@ -165,8 +189,10 @@ export interface FileRouteTypes {
     | '/_authenticated/fil'
     | '/_authenticated/parametres'
     | '/_authenticated/dessin/$drawingId'
+    | '/_authenticated/messagerie/$userId'
     | '/_authenticated/profil/$username'
     | '/_authenticated/studio/$drawingId'
+    | '/_authenticated/messagerie/'
     | '/_authenticated/studio/'
   fileRoutesById: FileRoutesById
 }
@@ -243,6 +269,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDessinDrawingIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/messagerie/': {
+      id: '/_authenticated/messagerie/'
+      path: '/messagerie'
+      fullPath: '/messagerie/'
+      preLoaderRoute: typeof AuthenticatedMessagerieIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/messagerie/$userId': {
+      id: '/_authenticated/messagerie/$userId'
+      path: '/messagerie/$userId'
+      fullPath: '/messagerie/$userId'
+      preLoaderRoute: typeof AuthenticatedMessagerieUserIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profil/$username': {
       id: '/_authenticated/profil/$username'
       path: '/profil/$username'
@@ -272,8 +312,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFilRoute: typeof AuthenticatedFilRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
   AuthenticatedDessinDrawingIdRoute: typeof AuthenticatedDessinDrawingIdRoute
+  AuthenticatedMessagerieUserIdRoute: typeof AuthenticatedMessagerieUserIdRoute
   AuthenticatedProfilUsernameRoute: typeof AuthenticatedProfilUsernameRoute
   AuthenticatedStudioDrawingIdRoute: typeof AuthenticatedStudioDrawingIdRoute
+  AuthenticatedMessagerieIndexRoute: typeof AuthenticatedMessagerieIndexRoute
   AuthenticatedStudioIndexRoute: typeof AuthenticatedStudioIndexRoute
 }
 
@@ -282,8 +324,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFilRoute: AuthenticatedFilRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
   AuthenticatedDessinDrawingIdRoute: AuthenticatedDessinDrawingIdRoute,
+  AuthenticatedMessagerieUserIdRoute: AuthenticatedMessagerieUserIdRoute,
   AuthenticatedProfilUsernameRoute: AuthenticatedProfilUsernameRoute,
   AuthenticatedStudioDrawingIdRoute: AuthenticatedStudioDrawingIdRoute,
+  AuthenticatedMessagerieIndexRoute: AuthenticatedMessagerieIndexRoute,
   AuthenticatedStudioIndexRoute: AuthenticatedStudioIndexRoute,
 }
 

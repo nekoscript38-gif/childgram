@@ -71,6 +71,13 @@
       "when": 1794727144091,
       "tag": "0009_pre_adult_comment_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794731850788,
+      "tag": "0010_ban_private_messages",
+      "breakpoints": true
     }
   ]
 }
