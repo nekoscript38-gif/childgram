@@ -209,7 +209,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ages_can_comment: {
+        Args: { _author: number; _writer: number }
+        Returns: boolean
+      }
       can_comment_on: { Args: { _drawing_id: string }; Returns: boolean }
+      comment_age_tier: { Args: { _age: number }; Returns: number }
       comment_block_reason: { Args: { _drawing_id: string }; Returns: string }
       current_age: {
         Args: { p: Database["public"]["Tables"]["profiles"]["Row"] }
