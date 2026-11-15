@@ -16,9 +16,9 @@ export const Route = createFileRoute("/_authenticated/studio/$drawingId")({
   head: () => ({
     meta: [
       { title: "Studio — ChildGram" },
-      { name: "description", content: "Dessine avec 25 couleurs, 8 pinceaux et le spectre de couleurs." },
+      { name: "description", content: "Dessine avec 25 couleurs, 8 pinceaux, 50 emojis et 30 décorations." },
       { property: "og:title", content: "Studio — ChildGram" },
-      { property: "og:description", content: "Dessine avec 25 couleurs, 8 pinceaux et le spectre de couleurs." },
+      { property: "og:description", content: "Dessine avec 25 couleurs, 8 pinceaux, 50 emojis et 30 décorations." },
     ],
   }),
   component: StudioEditor,
