@@ -5,12 +5,12 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertTriangle, Ban, Check, Search, ShieldCheck, Undo2 } from "lucide-react";
+import { AlertTriangle, Ban, Check, Mail, Search, ShieldCheck, Undo2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KidAvatar } from "@/components/childgram/Avatar";
-import { adminUsersQuery, isAdminQuery, meQuery, type AdminUserRow } from "@/lib/queries";
+import { adminBanInboxQuery, adminUsersQuery, isAdminQuery, meQuery, type AdminUserRow } from "@/lib/queries";
 import { ageOn, effectiveAge, isAllowedAdminBirthDate, needsParentalConsent } from "@/lib/rules";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -22,6 +22,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
     Promise.all([
       context.queryClient.ensureQueryData(adminUsersQuery),
       context.queryClient.ensureQueryData(meQuery),
+      context.queryClient.ensureQueryData(adminBanInboxQuery),
     ]),
   head: () => ({
     meta: [
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const { data: users } = useSuspenseQuery(adminUsersQuery);
   const { data: me } = useSuspenseQuery(meQuery);
+  const { data: inbox } = useSuspenseQuery(adminBanInboxQuery);
   const [q, setQ] = useState("");
   const filtered = useMemo(
     () => users.filter((u) => u.username.toLowerCase().includes(q.trim().toLowerCase())),
@@ -53,7 +55,8 @@ function AdminPage() {
           </h1>
           <p className="mt-1 font-semibold text-muted-foreground">
             {users.length} compte{users.length > 1 ? "s" : ""}. Les dates de naissance ne sont visibles que par toi.
-            {" "}« Mettre à 0 an » bannit un profil jusqu'à ce que tu remontes son âge.
+            {" "}« Mettre à 0 an » bannit un profil jusqu'à ce que tu remontes son âge ;
+            {" "}« Messages » te permet alors de lui expliquer pourquoi.
           </p>
         </div>
         <div className="relative w-full sm:w-64">
@@ -64,7 +67,7 @@ function AdminPage() {
 
       <ul className="space-y-4">
         {filtered.map((u) => (
-          <UserRow key={u.id} user={u} isMe={u.id === me?.id} />
+          <UserRow key={u.id} user={u} isMe={u.id === me?.id} inbox={inbox[u.id]} />
         ))}
         {filtered.length === 0 && (
           <li className="sticker p-6 text-center font-bold">Aucun compte trouvé.</li>
@@ -74,7 +77,15 @@ function AdminPage() {
   );
 }
 
-function UserRow({ user, isMe }: { user: AdminUserRow; isMe: boolean }) {
+function UserRow({
+  user,
+  isMe,
+  inbox,
+}: {
+  user: AdminUserRow;
+  isMe: boolean;
+  inbox?: { sender_id: string; created_at: string; count: number };
+}) {
   const qc = useQueryClient();
   const [date, setDate] = useState(user.birth_date ?? "");
   const changed = date !== (user.birth_date ?? "");
@@ -118,6 +129,7 @@ function UserRow({ user, isMe }: { user: AdminUserRow; isMe: boolean }) {
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["feed"] });
+      qc.invalidateQueries({ queryKey: ["ban-messages"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -136,6 +148,12 @@ function UserRow({ user, isMe }: { user: AdminUserRow; isMe: boolean }) {
           {banned && (
             <p className="mt-1 flex items-center gap-1 text-xs font-bold text-destructive">
               <Ban className="h-3.5 w-3.5" /> Profil banni (0 an) depuis le {format(new Date(user.banned_at!), "d MMM yyyy", { locale: fr })}
+            </p>
+          )}
+          {inbox && inbox.sender_id === user.id && (
+            <p className="mt-1 flex items-center gap-1 text-xs font-bold text-primary">
+              <Mail className="h-3.5 w-3.5" /> Dernier message de @{user.username} le{" "}
+              {format(new Date(inbox.created_at), "d MMM 'à' HH:mm", { locale: fr })}
             </p>
           )}
           {missingConsent && (
@@ -172,6 +190,13 @@ function UserRow({ user, isMe }: { user: AdminUserRow; isMe: boolean }) {
             {changed && newAge !== null ? `${newAge} ans` : "OK"}
           </Button>
         </form>
+        {!isMe && (banned || inbox) && (
+          <Button asChild size="sm" variant="outline">
+            <Link to="/messagerie/$userId" params={{ userId: user.id }}>
+              <Mail /> Messages{inbox ? ` (${inbox.count})` : ""}
+            </Link>
+          </Button>
+        )}
         {!isMe &&
           (banned ? (
             <Button
