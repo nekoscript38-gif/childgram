@@ -102,10 +102,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const STALE_PAGE_GUARD = `(function(){var re=/Importing a module script failed|Failed to fetch dynamically imported module|error loading dynamically imported module/i;function r(m){if(!re.test(String(m||"")))return;try{var k="childgram:chunk-reload-at",l=Number(sessionStorage.getItem(k)||0);if(Date.now()-l<15000)return;sessionStorage.setItem(k,String(Date.now()))}catch(e){}location.reload()}window.addEventListener("error",function(e){r(e&&(e.message||(e.error&&e.error.message)))});window.addEventListener("unhandledrejection",function(e){var x=e&&e.reason;r(x&&(x.message||x))})})();`;
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
       <head>
+        {/* Runs before the app's own files: if they fail to load (stale page after an update), reload once. */}
+        <script dangerouslySetInnerHTML={{ __html: STALE_PAGE_GUARD }} />
         <HeadContent />
       </head>
       <body>
