@@ -189,7 +189,7 @@ function DrawingPage() {
                 ? "Les commentaires s'ouvriront pour toi à tes 9 ans. En attendant, tu peux envoyer des cœurs !"
                 : blockReason === "author_too_young"
                   ? "Cet artiste a moins de 9 ans : ses dessins ne reçoivent pas de commentaires. Tu peux quand même lui envoyer un cœur !"
-                  : "Les commentaires sont réservés aux artistes de la même tranche d'âge (9 à 13 ans, ou 14 ans et plus). Tu peux quand même envoyer un cœur !"}
+                  : "Les commentaires sont réservés aux artistes de tranches d'âge proches (9-13 ans entre eux ; 14-17 ans avec 14-20 ans ; 18-20 ans avec 14 ans et plus ; 21 ans et plus avec 18 ans et plus). Tu peux quand même envoyer un cœur !"}
             </p>
           )}
 
