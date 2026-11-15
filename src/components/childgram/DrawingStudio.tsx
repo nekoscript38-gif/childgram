@@ -2,12 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Eraser, Paintbrush, Redo2, Save, Send, Trash2, Undo2, EyeOff, Sparkles } from "lucide-react";
+import { Eraser, Paintbrush, Redo2, Save, Send, Trash2, Undo2, EyeOff, Sparkles, RotateCcw, RotateCw, Smile, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BRUSH_SIZES, CANVAS_SIZE, PALETTE } from "@/lib/palette";
 import { TITLE_MAX } from "@/lib/rules";
+import { DECORATION_STICKERS, EMOJI_FONT, EMOJI_STICKERS, STICKER_SIZES, type Sticker } from "@/lib/stickers";
 import { cn } from "@/lib/utils";
 
 type Initial = {
@@ -18,6 +19,25 @@ type Initial = {
 };
 
 const HISTORY_LIMIT = 15;
+/** Emoji glyphs render a bit larger than their font size; keep them the chosen size. */
+const EMOJI_SCALE = 0.85;
+
+type Ghost = { x: number; y: number; scale: number; pressed: boolean };
+
+const decoCache = new Map<string, Promise<HTMLImageElement>>();
+function loadDeco(src: string) {
+  let p = decoCache.get(src);
+  if (!p) {
+    p = new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+    decoCache.set(src, p);
+  }
+  return p;
+}
 
 function exportImage(canvas: HTMLCanvasElement) {
   const webp = canvas.toDataURL("image/webp", 0.9);
@@ -35,7 +55,12 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
 
   const [color, setColor] = useState<string>(PALETTE[5] ?? "#e53935");
   const [size, setSize] = useState<number>(BRUSH_SIZES[3] ?? 11);
-  const [tool, setTool] = useState<"brush" | "eraser">("brush");
+  const [tool, setTool] = useState<"brush" | "eraser" | "sticker">("brush");
+  const [stickerTab, setStickerTab] = useState<"emoji" | "deco">("emoji");
+  const [sticker, setSticker] = useState<Sticker>(EMOJI_STICKERS[0]!);
+  const [stickerSize, setStickerSize] = useState<number>(STICKER_SIZES[2] ?? 120);
+  const [rotation, setRotation] = useState(0);
+  const [ghost, setGhost] = useState<Ghost | null>(null);
   const [title, setTitle] = useState(initial.title);
   const [published, setPublished] = useState(initial.is_published);
   const [saving, setSaving] = useState<null | "save" | "publish" | "unpublish" | "delete">(null);
@@ -55,6 +80,7 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
       img.onload = () => ctx.drawImage(img, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
       img.src = initial.image_data;
     }
+    DECORATION_STICKERS.forEach((d) => d.kind === "deco" && void loadDeco(d.src).catch(() => {}));
     // Load the saved picture only once: later refetches must not wipe new strokes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -84,9 +110,44 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
     ctx.lineJoin = "round";
   }
 
+  function ghostAt(e: React.PointerEvent<HTMLCanvasElement>, pressed: boolean): Ghost {
+    const rect = e.currentTarget.getBoundingClientRect();
+    return { ...point(e), scale: rect.width / CANVAS_SIZE, pressed };
+  }
+
+  async function stamp(p: { x: number; y: number }) {
+    const ctx = ctxRef.current!;
+    const current = sticker;
+    const img = current.kind === "deco" ? await loadDeco(current.src).catch(() => null) : null;
+    if (current.kind === "deco" && !img) {
+      toast.error("Oups, cette décoration n'a pas pu se coller");
+      return;
+    }
+    snapshot();
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.translate(p.x, p.y);
+    ctx.rotate((rotation * Math.PI) / 180);
+    if (current.kind === "emoji") {
+      ctx.font = `${Math.round(stickerSize * EMOJI_SCALE)}px ${EMOJI_FONT}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#000000";
+      ctx.fillText(current.char, 0, stickerSize * 0.04);
+    } else if (img) {
+      ctx.drawImage(img, -stickerSize / 2, -stickerSize / 2, stickerSize, stickerSize);
+    }
+    ctx.restore();
+  }
+
   function onDown(e: React.PointerEvent<HTMLCanvasElement>) {
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
+    if (tool === "sticker") {
+      setGhost(ghostAt(e, true));
+      return;
+    }
     snapshot();
     drawing.current = true;
     const p = point(e);
@@ -99,6 +160,12 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
   }
 
   function onMove(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (tool === "sticker") {
+      const next = ghostAt(e, false);
+      const isMouse = e.pointerType === "mouse";
+      setGhost((g) => (g?.pressed ? { ...next, pressed: true } : isMouse ? next : g));
+      return;
+    }
     if (!drawing.current || !last.current) return;
     const ctx = ctxRef.current!;
     const events = (e.nativeEvent.getCoalescedEvents?.() ?? [e.nativeEvent]) as PointerEvent[];
@@ -119,9 +186,33 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
     }
   }
 
-  function onUp() {
+  function onUp(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (tool === "sticker") {
+      if (ghost?.pressed) void stamp(point(e));
+      setGhost(e.pointerType === "mouse" ? ghostAt(e, false) : null);
+      return;
+    }
+    endStroke();
+  }
+
+  function onCancel() {
+    setGhost(null);
+    endStroke();
+  }
+
+  function onLeave() {
+    setGhost((g) => (g?.pressed ? g : null));
+    if (tool !== "sticker") endStroke();
+  }
+
+  function endStroke() {
     drawing.current = false;
     last.current = null;
+  }
+
+  function pickSticker(s: Sticker) {
+    setSticker(s);
+    setTool("sticker");
   }
 
   function undo() {
@@ -206,6 +297,7 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
   }
 
   const isCustomColor = !PALETTE.includes(color);
+  const stickerList = stickerTab === "emoji" ? EMOJI_STICKERS : DECORATION_STICKERS;
   void historyTick;
 
   return (
@@ -231,6 +323,7 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
         </div>
 
         <div className="sticker-lg overflow-hidden p-2">
+          <div className="relative overflow-hidden rounded-xl">
           <canvas
             ref={canvasRef}
             width={CANVAS_SIZE}
@@ -238,14 +331,37 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
             onPointerDown={onDown}
             onPointerMove={onMove}
             onPointerUp={onUp}
-            onPointerCancel={onUp}
-            onPointerLeave={onUp}
+            onPointerCancel={onCancel}
+            onPointerLeave={onLeave}
             className={cn(
               "block aspect-square w-full touch-none rounded-xl bg-paper",
-              tool === "eraser" ? "cursor-cell" : "cursor-crosshair",
+              tool === "eraser" ? "cursor-cell" : tool === "sticker" ? "cursor-copy" : "cursor-crosshair",
             )}
             aria-label="Zone de dessin"
           />
+          {tool === "sticker" && ghost && (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute grid place-items-center"
+              style={{
+                left: `${(ghost.x / CANVAS_SIZE) * 100}%`,
+                top: `${(ghost.y / CANVAS_SIZE) * 100}%`,
+                width: `${(stickerSize / CANVAS_SIZE) * 100}%`,
+                aspectRatio: "1",
+                transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+                opacity: ghost.pressed ? 0.9 : 0.55,
+              }}
+            >
+              {sticker.kind === "emoji" ? (
+                <span style={{ fontFamily: EMOJI_FONT, fontSize: stickerSize * EMOJI_SCALE * ghost.scale, lineHeight: 1 }}>
+                  {sticker.char}
+                </span>
+              ) : (
+                <img src={sticker.src} alt="" draggable={false} className="h-full w-full" />
+              )}
+            </div>
+          )}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -349,6 +465,89 @@ export function DrawingStudio({ initial }: { initial: Initial }) {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="sticker space-y-3 p-4">
+          <div className="flex items-center justify-between">
+            <p className="font-display text-lg font-bold">Autocollants</p>
+            <span className="grid h-9 w-9 place-items-center rounded-xl border-[2.5px] border-ink bg-card" aria-label={`Autocollant choisi : ${sticker.label}`}>
+              {sticker.kind === "emoji" ? (
+                <span className="text-xl leading-none" style={{ fontFamily: EMOJI_FONT }}>{sticker.char}</span>
+              ) : (
+                <img src={sticker.src} alt="" className="h-7 w-7" />
+              )}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant={stickerTab === "emoji" ? "sun" : "outline"} size="sm" onClick={() => setStickerTab("emoji")} aria-pressed={stickerTab === "emoji"}>
+              <Smile /> Emojis
+            </Button>
+            <Button variant={stickerTab === "deco" ? "sun" : "outline"} size="sm" onClick={() => setStickerTab("deco")} aria-pressed={stickerTab === "deco"}>
+              <Star /> Décorations
+            </Button>
+          </div>
+          <div className="grid max-h-56 grid-cols-6 gap-1.5 overflow-y-auto p-1">
+            {stickerList.map((s) => {
+              const active = tool === "sticker" && s.id === sticker.id;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  aria-label={s.label}
+                  title={s.label}
+                  aria-pressed={active}
+                  onClick={() => pickSticker(s)}
+                  className={cn(
+                    "grid aspect-square place-items-center rounded-lg border-2 border-ink bg-card transition-transform hover:scale-110",
+                    active && "scale-110 bg-secondary ring-4 ring-primary",
+                  )}
+                >
+                  {s.kind === "emoji" ? (
+                    <span className="text-xl leading-none" style={{ fontFamily: EMOJI_FONT }}>{s.char}</span>
+                  ) : (
+                    <img src={s.src} alt="" loading="lazy" className="h-[80%] w-[80%]" draggable={false} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <div className="space-y-2">
+            <p className="font-display text-sm font-bold">Taille de l'autocollant</p>
+            <div className="grid grid-cols-5 gap-2">
+              {STICKER_SIZES.map((s, i) => (
+                <button
+                  key={s}
+                  type="button"
+                  aria-label={`Taille d'autocollant ${i + 1}`}
+                  aria-pressed={s === stickerSize}
+                  onClick={() => {
+                    setStickerSize(s);
+                    setTool("sticker");
+                  }}
+                  className={cn(
+                    "grid aspect-square place-items-center rounded-xl border-[2.5px] border-ink bg-card transition-transform hover:scale-105",
+                    s === stickerSize && "bg-secondary ring-4 ring-primary",
+                  )}
+                >
+                  <Star className="fill-current" style={{ width: 8 + i * 4, height: 8 + i * 4 }} strokeWidth={2.5} />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <Button variant="outline" size="sm" onClick={() => setRotation((r) => (r - 15 + 360) % 360)} aria-label="Tourner à gauche">
+              <RotateCcw />
+            </Button>
+            <button type="button" onClick={() => setRotation(0)} className="font-display text-sm font-bold" aria-label="Remettre droit">
+              {rotation === 0 ? "Bien droit" : `Tourné de ${rotation}°`}
+            </button>
+            <Button variant="outline" size="sm" onClick={() => setRotation((r) => (r + 15) % 360)} aria-label="Tourner à droite">
+              <RotateCw />
+            </Button>
+          </div>
+          <p className="text-xs font-semibold text-muted-foreground">
+            Choisis un autocollant, puis touche ton dessin là où tu veux le coller. Garde le doigt appuyé pour le déplacer avant de lâcher !
+          </p>
         </div>
 
         <div className="grid gap-2">

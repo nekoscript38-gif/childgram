@@ -105,7 +105,7 @@ function Index() {
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="grid gap-5 md:grid-cols-3">
           <Feature color="bg-secondary" icon={<Paintbrush className="h-7 w-7" />} title="Ton studio">
-            25 couleurs, 8 tailles de pinceau et un spectre pour inventer tes propres couleurs.
+            25 couleurs, 8 tailles de pinceau, un spectre pour inventer tes propres couleurs, 50 emojis et 30 décorations à coller où tu veux.
           </Feature>
           <Feature color="bg-accent" icon={<MessageCircle className="h-7 w-7" />} title="Partage">
             Publie tes dessins sur ton profil. Les autres enfants peuvent t'envoyer des cœurs et des mots gentils.
