@@ -257,3 +257,42 @@ export const canCommentQuery = (drawingId: string) =>
     },
   });
 
+
+export type BanMessage = { id: string; user_id: string; sender_id: string; content: string; created_at: string };
+
+/** One banned profile's private conversation with the admin (RLS: that user while banned, or admins). */
+export const banMessagesQuery = (userId: string) =>
+  queryOptions({
+    queryKey: ["ban-messages", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ban_messages")
+        .select("id,user_id,sender_id,content,created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: true });
+      if (error) throw new Error(error.message);
+      return data as BanMessage[];
+    },
+    refetchInterval: 10_000,
+  });
+
+/** Admin overview: last message per conversation (who wrote last, and when). */
+export const adminBanInboxQuery = queryOptions({
+  queryKey: ["ban-messages", "admin-inbox"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("ban_messages")
+      .select("user_id,sender_id,created_at")
+      .order("created_at", { ascending: false })
+      .limit(1000);
+    if (error) throw new Error(error.message);
+    const last = new Map<string, { sender_id: string; created_at: string; count: number }>();
+    for (const m of data) {
+      const cur = last.get(m.user_id);
+      if (cur) cur.count += 1;
+      else last.set(m.user_id, { sender_id: m.sender_id, created_at: m.created_at, count: 1 });
+    }
+    return Object.fromEntries(last);
+  },
+  refetchInterval: 30_000,
+});
