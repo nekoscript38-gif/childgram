@@ -84,7 +84,7 @@ function UserRow({
 }: {
   user: AdminUserRow;
   isMe: boolean;
-  inbox?: { sender_id: string; created_at: string; count: number };
+  inbox?: { sender_id: string; created_at: string; count: number } | undefined;
 }) {
   const qc = useQueryClient();
   const [date, setDate] = useState(user.birth_date ?? "");
