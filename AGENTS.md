@@ -32,7 +32,7 @@ use the editor.
 ## Project rules (ChildGram)
 
 - Auth is username + password: the client derives a private synthetic email (`usernameToAuthEmail` in `src/lib/rules.ts`) and auto-confirm is on, because kids never give an email.
-- Profile creation, the minimum sign-up age (`MIN_SIGNUP_AGE`) and the under-13 consent check run in the `handle_new_user` trigger from signup metadata, so the rule can't be bypassed from the browser.
+- Profile creation, the sign-up age limits (`MIN_SIGNUP_AGE`, `MAX_SIGNUP_AGE`) and the under-13 consent check run in the `handle_new_user` trigger from signup metadata, so the rule can't be bypassed from the browser.
 - Birth date and consent live in `profile_private` (owner + admin read; only admins may update `birth_date`); other users see only the age number via the `current_age(profiles)` computed field, never the date.
 - Admin rights come only from `user_roles` checked with `has_role()` in RLS; the `/admin` route guard is UI-only.
 - `profiles` is visible to its owner, admins, and kids who shared something; only `avatar_id`/`bio` are column-granted for update.
