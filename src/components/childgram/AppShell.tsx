@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Home, Paintbrush, Plus, Settings, ShieldCheck, User } from "lucide-react";
 import { isAdminQuery, meQuery, myPrivateQuery } from "@/lib/queries";
 import { BannedBanner } from "./BannedNotice";
+import { CurfewWatcher } from "./CurfewWatcher";
 import { Logo } from "./Logo";
 import { KidAvatar } from "./Avatar";
 import { SiteFooter } from "./SiteFooter";
@@ -64,9 +65,11 @@ export function AppShell() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6">
-        {banned && <BannedBanner self className="mb-6" />}
+        {banned && <BannedBanner self reason={priv?.ban_reason} className="mb-6" />}
         <Outlet />
       </main>
+
+      {isAdmin === false && <CurfewWatcher />}
 
       <div className="hidden md:block">
         <SiteFooter />
