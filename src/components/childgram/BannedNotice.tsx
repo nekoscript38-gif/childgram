@@ -3,7 +3,18 @@ import { Ban, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Red banner shown on a soft-banned profile (age set to 0 by the admin). */
-export function BannedBanner({ self = false, className }: { self?: boolean; className?: string }) {
+export const CURFEW_BAN_TEXT =
+  "Ton compte a été temporairement désactivé pour activité de connexion à des horaires suspects pour l'âge déclaré.";
+
+export function BannedBanner({
+  self = false,
+  reason = null,
+  className,
+}: {
+  self?: boolean;
+  reason?: string | null;
+  className?: string;
+}) {
   return (
     <div
       role="alert"
@@ -16,7 +27,9 @@ export function BannedBanner({ self = false, className }: { self?: boolean; clas
       <div>
         <p className="font-display text-xl font-extrabold uppercase tracking-wide">Profil banni</p>
         <p className="text-sm font-bold">
-          {self
+          {self && reason === "curfew"
+            ? `${CURFEW_BAN_TEXT} Tu ne peux plus dessiner, publier, modifier ton profil, envoyer de cœurs ni de commentaires tant que l'administratrice ne l'a pas réactivé.`
+            : self
             ? "Ton compte a été bloqué par l'administratrice. Tu ne peux plus dessiner, publier, modifier ton profil, envoyer de cœurs ni de commentaires."
             : "Ce profil a été bloqué par l'administratrice de ChildGram."}
         </p>

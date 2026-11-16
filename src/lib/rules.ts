@@ -120,3 +120,80 @@ export function canSendBanMessage(opts: {
   if (senderIsAdmin) return senderId !== conversationUserId;
   return senderId === conversationUserId;
 }
+
+/**
+ * Curfew by declared age (Paris time). "HH:MM" strings; a window [start, end) is blocked.
+ * morning = no connection before; evening = no connection from; noon = afternoon window,
+ * only on school days (not Wednesday, Saturday, Sunday). Mirrors `curfew_blocked_at` in the
+ * database, which is the real enforcement (called by `check_curfew()`).
+ */
+export const CURFEW_TIME_ZONE = "Europe/Paris";
+export const CURFEW_STRIKES_TO_BAN = 2;
+export const CURFEW_FREE_DAYS = [3, 6, 7]; // ISO days: Wednesday, Saturday, Sunday
+export type CurfewSchedule = {
+  morning: string | null;
+  evening: string | null;
+  noonStart: string | null;
+  noonEnd: string | null;
+};
+export type CurfewSettings = {
+  curfew_custom: boolean;
+  curfew_morning: string | null;
+  curfew_evening: string | null;
+  curfew_noon_start: string | null;
+  curfew_noon_end: string | null;
+};
+
+/** Age-based curfew; null when the age has none (18+, or banned age 0). */
+export function defaultCurfew(age: number): CurfewSchedule | null {
+  if (Number.isNaN(age) || age < 1 || age >= PRE_ADULT_AGE) return null;
+  if (age < MIN_COMMENT_AGE) return { morning: "08:00", evening: "20:00", noonStart: "14:00", noonEnd: "16:00" };
+  if (age < AGE_BARRIER) return { morning: "07:00", evening: "21:00", noonStart: "14:00", noonEnd: "17:00" };
+  return { morning: "06:00", evening: "22:00", noonStart: "15:00", noonEnd: "18:00" };
+}
+
+const hhmm = (t: string | null | undefined) => (t ? t.slice(0, 5) : null);
+
+/** The schedule that applies: the admin's custom hours if set, otherwise the age-based one. */
+export function curfewFor(age: number, settings?: CurfewSettings | null): CurfewSchedule | null {
+  if (settings?.curfew_custom) {
+    const s = {
+      morning: hhmm(settings.curfew_morning),
+      evening: hhmm(settings.curfew_evening),
+      noonStart: hhmm(settings.curfew_noon_start),
+      noonEnd: hhmm(settings.curfew_noon_end),
+    };
+    return s.morning || s.evening || (s.noonStart && s.noonEnd) ? s : null;
+  }
+  return defaultCurfew(age);
+}
+
+/** time = "HH:MM" local Paris time, isoDow = 1 (Monday) … 7 (Sunday). */
+export function isInCurfew(schedule: CurfewSchedule | null, time: string, isoDow: number) {
+  if (!schedule) return false;
+  const t = time.slice(0, 5);
+  if (schedule.morning && t < schedule.morning) return true;
+  if (schedule.evening && t >= schedule.evening) return true;
+  if (
+    schedule.noonStart &&
+    schedule.noonEnd &&
+    !CURFEW_FREE_DAYS.includes(isoDow) &&
+    t >= schedule.noonStart &&
+    t < schedule.noonEnd
+  )
+    return true;
+  return false;
+}
+
+const frTime = (t: string) => t.replace(":", "h").replace(/h00$/, "h");
+
+/** Human French description of a schedule, one line per rule. */
+export function describeCurfew(schedule: CurfewSchedule | null): string[] {
+  if (!schedule) return ["Pas de couvre-feu"];
+  const lines: string[] = [];
+  if (schedule.morning) lines.push(`Pas avant ${frTime(schedule.morning)}`);
+  if (schedule.evening) lines.push(`Pas à partir de ${frTime(schedule.evening)}`);
+  if (schedule.noonStart && schedule.noonEnd)
+    lines.push(`Pas entre ${frTime(schedule.noonStart)} et ${frTime(schedule.noonEnd)} (lundi, mardi, jeudi, vendredi)`);
+  return lines;
+}

@@ -168,22 +168,46 @@ export type Database = {
       }
       profile_private: {
         Row: {
+          ban_reason: string | null
           banned_at: string | null
           birth_date: string
+          curfew_custom: boolean
+          curfew_evening: string | null
+          curfew_last_strike_at: string | null
+          curfew_morning: string | null
+          curfew_noon_end: string | null
+          curfew_noon_start: string | null
+          curfew_strikes: number
           parental_consent: boolean
           terms_accepted_at: string
           user_id: string
         }
         Insert: {
+          ban_reason?: string | null
           banned_at?: string | null
           birth_date: string
+          curfew_custom?: boolean
+          curfew_evening?: string | null
+          curfew_last_strike_at?: string | null
+          curfew_morning?: string | null
+          curfew_noon_end?: string | null
+          curfew_noon_start?: string | null
+          curfew_strikes?: number
           parental_consent?: boolean
           terms_accepted_at?: string
           user_id: string
         }
         Update: {
+          ban_reason?: string | null
           banned_at?: string | null
           birth_date?: string
+          curfew_custom?: boolean
+          curfew_evening?: string | null
+          curfew_last_strike_at?: string | null
+          curfew_morning?: string | null
+          curfew_noon_end?: string | null
+          curfew_noon_start?: string | null
+          curfew_strikes?: number
           parental_consent?: boolean
           terms_accepted_at?: string
           user_id?: string
@@ -253,8 +277,21 @@ export type Database = {
         Returns: boolean
       }
       can_comment_on: { Args: { _drawing_id: string }; Returns: boolean }
+      check_curfew: { Args: never; Returns: string }
       comment_age_tier: { Args: { _age: number }; Returns: number }
       comment_block_reason: { Args: { _drawing_id: string }; Returns: string }
+      curfew_blocked_at: {
+        Args: {
+          _age: number
+          _at: string
+          _custom: boolean
+          _evening: string
+          _morning: string
+          _noon_end: string
+          _noon_start: string
+        }
+        Returns: boolean
+      }
       current_age: {
         Args: { p: Database["public"]["Tables"]["profiles"]["Row"] }
         Returns: number

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, canCommentBetween, canSendBanMessage, effectiveAge, isAllowedAdminBirthDate, isOldEnoughToSignUp, isTooOldToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
+import { ageOn, CURFEW_STRIKES_TO_BAN, curfewFor, defaultCurfew, isInCurfew, canCommentBetween, canSendBanMessage, effectiveAge, isAllowedAdminBirthDate, isOldEnoughToSignUp, isTooOldToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
 import { AVATARS } from "./avatars";
 import { BRUSH_SIZES, PALETTE } from "./palette";
 
@@ -169,5 +169,66 @@ describe("private ban messaging", () => {
   });
   it("the admin can't write to a profile that is not banned", () => {
     expect(canSendBanMessage({ ...base, senderId: "admin", senderIsAdmin: true, conversationUserBanned: false })).toBe(false);
+  });
+});
+
+describe("curfew by declared age", () => {
+  const MON = 1, WED = 3, SAT = 6;
+  it("4-8: blocked before 8h and from 20h, open at 8h and 19h59", () => {
+    const s = defaultCurfew(6);
+    expect(isInCurfew(s, "07:59", MON)).toBe(true);
+    expect(isInCurfew(s, "08:00", MON)).toBe(false);
+    expect(isInCurfew(s, "19:59", MON)).toBe(false);
+    expect(isInCurfew(s, "20:00", MON)).toBe(true);
+  });
+  it("4-8: blocked 14h-16h on school days only", () => {
+    const s = defaultCurfew(8);
+    expect(isInCurfew(s, "14:00", MON)).toBe(true);
+    expect(isInCurfew(s, "15:59", MON)).toBe(true);
+    expect(isInCurfew(s, "16:00", MON)).toBe(false);
+    expect(isInCurfew(s, "14:30", WED)).toBe(false);
+    expect(isInCurfew(s, "14:30", SAT)).toBe(false);
+  });
+  it("9-13: blocked before 7h, from 21h, and 14h-17h", () => {
+    const s = defaultCurfew(9);
+    expect(isInCurfew(s, "06:59", SAT)).toBe(true);
+    expect(isInCurfew(s, "07:00", MON)).toBe(false);
+    expect(isInCurfew(s, "20:59", MON)).toBe(false);
+    expect(isInCurfew(s, "21:00", MON)).toBe(true);
+    expect(isInCurfew(s, "16:30", MON)).toBe(true);
+    expect(isInCurfew(s, "17:00", MON)).toBe(false);
+    expect(defaultCurfew(13)).toEqual(s);
+  });
+  it("14-17: blocked before 6h, from 22h, and 15h-18h", () => {
+    const s = defaultCurfew(14);
+    expect(isInCurfew(s, "05:59", MON)).toBe(true);
+    expect(isInCurfew(s, "06:00", MON)).toBe(false);
+    expect(isInCurfew(s, "21:59", MON)).toBe(false);
+    expect(isInCurfew(s, "22:00", MON)).toBe(true);
+    expect(isInCurfew(s, "14:59", MON)).toBe(false);
+    expect(isInCurfew(s, "17:59", MON)).toBe(true);
+    expect(defaultCurfew(17)).toEqual(s);
+  });
+  it("pré-adultes and adults have no curfew", () => {
+    expect(defaultCurfew(18)).toBeNull();
+    expect(isInCurfew(defaultCurfew(30), "03:00", MON)).toBe(false);
+  });
+  it("custom hours from the admin replace the age-based ones", () => {
+    const s = curfewFor(10, {
+      curfew_custom: true,
+      curfew_morning: "09:00:00",
+      curfew_evening: null,
+      curfew_noon_start: null,
+      curfew_noon_end: null,
+    });
+    expect(isInCurfew(s, "08:30", MON)).toBe(true);
+    expect(isInCurfew(s, "23:00", MON)).toBe(false);
+  });
+  it("custom hours left empty mean no curfew", () => {
+    const empty = { curfew_custom: true, curfew_morning: null, curfew_evening: null, curfew_noon_start: null, curfew_noon_end: null };
+    expect(curfewFor(6, empty)).toBeNull();
+  });
+  it("bans at the 2nd suspicious connection", () => {
+    expect(CURFEW_STRIKES_TO_BAN).toBe(2);
   });
 });

@@ -56,7 +56,9 @@ export const myPrivateQuery = queryOptions({
     // maybeSingle() would fail with "multiple rows" for them.
     const { data, error } = await supabase
       .from("profile_private")
-      .select("birth_date,parental_consent,terms_accepted_at,banned_at")
+      .select(
+        "birth_date,parental_consent,terms_accepted_at,banned_at,ban_reason,curfew_strikes,curfew_custom,curfew_morning,curfew_evening,curfew_noon_start,curfew_noon_end",
+      )
       .eq("user_id", u.user.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -163,24 +165,46 @@ export type AdminUserRow = {
   birth_date: string | null;
   parental_consent: boolean;
   banned_at: string | null;
+  ban_reason: string | null;
+  curfew_strikes: number;
+  curfew_last_strike_at: string | null;
+  curfew_custom: boolean;
+  curfew_morning: string | null;
+  curfew_evening: string | null;
+  curfew_noon_start: string | null;
+  curfew_noon_end: string | null;
 };
+
+const ADMIN_PRIVATE_SELECT =
+  "user_id,birth_date,parental_consent,banned_at,ban_reason,curfew_strikes,curfew_last_strike_at,curfew_custom,curfew_morning,curfew_evening,curfew_noon_start,curfew_noon_end";
 
 export const adminUsersQuery = queryOptions({
   queryKey: ["admin", "users"],
   queryFn: async () => {
     const [{ data: profiles, error: e1 }, { data: priv, error: e2 }] = await Promise.all([
       supabase.from("profiles").select("id,username,avatar_id,created_at").order("created_at", { ascending: false }),
-      supabase.from("profile_private").select("user_id,birth_date,parental_consent,banned_at"),
+      supabase.from("profile_private").select(ADMIN_PRIVATE_SELECT),
     ]);
     if (e1) throw new Error(e1.message);
     if (e2) throw new Error(e2.message);
     const byId = new Map(priv.map((p) => [p.user_id, p]));
-    return profiles.map<AdminUserRow>((p) => ({
-      ...p,
-      birth_date: byId.get(p.id)?.birth_date ?? null,
-      parental_consent: byId.get(p.id)?.parental_consent ?? false,
-      banned_at: byId.get(p.id)?.banned_at ?? null,
-    }));
+    return profiles.map<AdminUserRow>((p) => {
+      const pp = byId.get(p.id);
+      return {
+        ...p,
+        birth_date: pp?.birth_date ?? null,
+        parental_consent: pp?.parental_consent ?? false,
+        banned_at: pp?.banned_at ?? null,
+        ban_reason: pp?.ban_reason ?? null,
+        curfew_strikes: pp?.curfew_strikes ?? 0,
+        curfew_last_strike_at: pp?.curfew_last_strike_at ?? null,
+        curfew_custom: pp?.curfew_custom ?? false,
+        curfew_morning: pp?.curfew_morning ?? null,
+        curfew_evening: pp?.curfew_evening ?? null,
+        curfew_noon_start: pp?.curfew_noon_start ?? null,
+        curfew_noon_end: pp?.curfew_noon_end ?? null,
+      };
+    });
   },
 });
 
