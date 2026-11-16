@@ -5,13 +5,14 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertTriangle, Ban, Check, Mail, Search, ShieldCheck, Undo2 } from "lucide-react";
+import { AlertTriangle, Ban, Check, Mail, Moon, Search, ShieldCheck, Undo2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KidAvatar } from "@/components/childgram/Avatar";
 import { adminBanInboxQuery, adminUsersQuery, isAdminQuery, meQuery, type AdminUserRow } from "@/lib/queries";
-import { ageOn, effectiveAge, isAllowedAdminBirthDate, needsParentalConsent } from "@/lib/rules";
+import { ageOn, CURFEW_STRIKES_TO_BAN, curfewFor, describeCurfew, effectiveAge, isAllowedAdminBirthDate, needsParentalConsent } from "@/lib/rules";
+import { CurfewEditor } from "@/components/childgram/CurfewEditor";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async ({ context }) => {
@@ -56,7 +57,8 @@ function AdminPage() {
           <p className="mt-1 font-semibold text-muted-foreground">
             {users.length} compte{users.length > 1 ? "s" : ""}. Les dates de naissance ne sont visibles que par toi.
             {" "}« Mettre à 0 an » bannit un profil jusqu'à ce que tu remontes son âge ;
-            {" "}« Messages » te permet alors de lui expliquer pourquoi.
+            {" "}« Messages » te permet alors de lui expliquer pourquoi. Après {CURFEW_STRIKES_TO_BAN} connexions pendant son
+            {" "}couvre-feu, un compte est mis à 0 an automatiquement.
           </p>
         </div>
         <div className="relative w-full sm:w-64">
@@ -95,6 +97,9 @@ function UserRow({
   const newAge = valid ? ageOn(date) : null;
   const missingConsent = user.birth_date && needsParentalConsent(user.birth_date) && !user.parental_consent;
   const today = format(new Date(), "yyyy-MM-dd");
+  const [curfewOpen, setCurfewOpen] = useState(false);
+  const realAge = user.birth_date ? ageOn(user.birth_date) : NaN;
+  const curfew = curfewFor(realAge, user);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -135,7 +140,8 @@ function UserRow({
   });
 
   return (
-    <li className={`sticker flex flex-col gap-4 p-4 sm:flex-row sm:items-center ${banned ? "border-destructive" : ""}`}>
+    <li className={`sticker space-y-4 p-4 ${banned ? "border-destructive" : ""}`}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
       <Link to="/profil/$username" params={{ username: user.username }} className="flex min-w-0 flex-1 items-center gap-3">
         <KidAvatar avatarId={user.avatar_id} size={52} />
         <div className="min-w-0">
@@ -148,6 +154,19 @@ function UserRow({
           {banned && (
             <p className="mt-1 flex items-center gap-1 text-xs font-bold text-destructive">
               <Ban className="h-3.5 w-3.5" /> Profil banni (0 an) depuis le {format(new Date(user.banned_at!), "d MMM yyyy", { locale: fr })}
+              {user.ban_reason === "curfew" && " · automatiquement (couvre-feu)"}
+            </p>
+          )}
+          {!isMe && (
+            <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+              <Moon className="h-3.5 w-3.5 shrink-0" />
+              {user.curfew_custom ? "Couvre-feu perso : " : "Couvre-feu : "}
+              {describeCurfew(curfew).join(" · ")}
+              {user.curfew_strikes > 0 && (
+                <span className="font-bold text-destructive">
+                  {" "}· {user.curfew_strikes}/{CURFEW_STRIKES_TO_BAN} connexion{user.curfew_strikes > 1 ? "s" : ""} suspecte{user.curfew_strikes > 1 ? "s" : ""}
+                </span>
+              )}
             </p>
           )}
           {inbox && inbox.sender_id === user.id && (
@@ -223,7 +242,14 @@ function UserRow({
               <Ban /> Mettre à 0 an
             </Button>
           ))}
+        {!isMe && (
+          <Button type="button" size="sm" variant="secondary" aria-expanded={curfewOpen} onClick={() => setCurfewOpen((o) => !o)}>
+            <Moon /> Couvre-feu
+          </Button>
+        )}
       </div>
+      </div>
+      {curfewOpen && !isMe && <CurfewEditor user={user} realAge={realAge} />}
     </li>
   );
 }
