@@ -78,6 +78,13 @@
       "when": 1794731850788,
       "tag": "0010_ban_private_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794813025046,
+      "tag": "0011_maximum_signup_age_39",
+      "breakpoints": true
     }
   ]
 }
