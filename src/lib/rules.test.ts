@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, canCommentBetween, canSendBanMessage, effectiveAge, isAllowedAdminBirthDate, isOldEnoughToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
+import { ageOn, canCommentBetween, canSendBanMessage, effectiveAge, isAllowedAdminBirthDate, isOldEnoughToSignUp, isTooOldToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
 import { AVATARS } from "./avatars";
 import { BRUSH_SIZES, PALETTE } from "./palette";
 
@@ -117,6 +117,21 @@ describe("minimum sign-up age", () => {
   });
   it("accepts a child on their 4th birthday", () => {
     expect(isOldEnoughToSignUp("2022-11-12", today)).toBe(true);
+  });
+});
+
+describe("maximum sign-up age", () => {
+  it("accepts someone who is 39", () => {
+    expect(isTooOldToSignUp("1987-01-01", today)).toBe(false);
+  });
+  it("accepts the day before the 40th birthday", () => {
+    expect(isTooOldToSignUp("1986-11-13", today)).toBe(false);
+  });
+  it("refuses someone on their 40th birthday", () => {
+    expect(isTooOldToSignUp("1986-11-12", today)).toBe(true);
+  });
+  it("refuses a 55-year-old", () => {
+    expect(isTooOldToSignUp("1971-03-01", today)).toBe(true);
   });
 });
 

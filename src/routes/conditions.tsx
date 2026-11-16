@@ -15,7 +15,7 @@ export const Route = createFileRoute("/conditions")({
 
 function Terms() {
   return (
-    <LegalLayout title="Conditions d'utilisation" updated="15 novembre 2026">
+    <LegalLayout title="Conditions d'utilisation" updated="16 novembre 2026">
       <p>
         Bienvenue sur ChildGram ! ChildGram est une plateforme où les enfants peuvent dessiner, publier leurs dessins sur leur profil
         et les partager avec d'autres enfants, qui peuvent leur envoyer des cœurs et des commentaires. En créant un compte ou en
@@ -27,6 +27,12 @@ function Terms() {
         <li>
           <strong>À partir de 4 ans :</strong> ChildGram est fait pour les enfants de <strong>moyenne section de maternelle et plus</strong>,
           pas pour les tout-petits ni les bébés. Il n'est pas possible de créer un compte pour un enfant de moins de 4 ans.
+        </li>
+        <li>
+          <strong>Jusqu'à 39 ans :</strong> l'âge maximum pour utiliser ChildGram est de <strong>39 ans</strong>. Au-delà, ChildGram
+          considère qu'un adulte plus âgé n'a rien à faire sur une plateforme qui accueille aussi des enfants à partir de 4 ans. Il n'est
+          donc pas possible de créer un compte à partir de 40 ans. Si le compte est pour un enfant, un adolescent ou un adulte plus jeune,
+          c'est son âge à lui qu'il faut indiquer.
         </li>
         <li>
           <strong>Moins de 13 ans :</strong> tout utilisateur de moins de 13 ans doit disposer d'une <strong>autorisation parentale formelle</strong>.
@@ -73,7 +79,7 @@ function Terms() {
           autres pré-adultes et les adultes.
         </li>
         <li>
-          <strong>Adulte (21 ans et plus) :</strong> peut communiquer avec les pré-adultes et les autres adultes, mais jamais avec les
+          <strong>Adulte (de 21 à 39 ans) :</strong> peut communiquer avec les pré-adultes et les autres adultes, mais jamais avec les
           adolescents ni avec les plus jeunes.
         </li>
       </ul>
