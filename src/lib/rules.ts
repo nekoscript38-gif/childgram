@@ -8,6 +8,10 @@ export const TITLE_MAX = 60;
 export const PASSWORD_MIN = 8;
 /** Below this age sign-up is refused (blocks fake "baby" accounts). Mirrors handle_new_user. */
 export const MIN_SIGNUP_AGE = 4;
+/** Oldest age allowed to sign up (included); from 40 sign-up is refused. Mirrors handle_new_user. */
+export const MAX_SIGNUP_AGE = 39;
+export const TOO_OLD_MESSAGE =
+  "Désolé mais selon nos conditions d'utilisations, vous êtes trop vieux pour utiliser ChildGram. Si votre compte est pour votre enfant, votre adolescent ou un adulte plus jeune, mettez son âge à lui.";
 
 export function isValidUsername(username: string) {
   return USERNAME_RE.test(username.trim());
@@ -38,6 +42,12 @@ export function needsParentalConsent(birthDate: string, today: Date = new Date()
 export function isOldEnoughToSignUp(birthDate: string, today: Date = new Date()) {
   const age = ageOn(birthDate, today);
   return !Number.isNaN(age) && age >= MIN_SIGNUP_AGE;
+}
+
+/** Sign-up is refused above MAX_SIGNUP_AGE (39 is the last allowed age). */
+export function isTooOldToSignUp(birthDate: string, today: Date = new Date()) {
+  const age = ageOn(birthDate, today);
+  return !Number.isNaN(age) && age > MAX_SIGNUP_AGE;
 }
 
 /** A birth date must be a real day, not in the future, and at most 120 years ago. */

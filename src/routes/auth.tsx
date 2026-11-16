@@ -16,6 +16,8 @@ import {
   PASSWORD_MIN,
   ageOn,
   isOldEnoughToSignUp,
+  isTooOldToSignUp,
+  TOO_OLD_MESSAGE,
   isValidUsername,
   needsParentalConsent,
   usernameToAuthEmail,
@@ -184,6 +186,7 @@ function SignupForm({ onDone }: { onDone: () => void }) {
     if (!birthDate || Number.isNaN(age) || birthDate > today) { toast.error("Indique une date de naissance valide"); return; }
     if (!isOldEnoughToSignUp(birthDate))
       { toast.error(`ChildGram est pour les enfants de ${MIN_SIGNUP_AGE} ans et plus (moyenne section et plus)`); return; }
+    if (isTooOldToSignUp(birthDate)) { toast.error(TOO_OLD_MESSAGE); return; }
     if (underAge && !parentConsent)
       { toast.error("Avant 13 ans, c'est un parent ou un représentant légal qui doit ouvrir le compte"); return; }
     if (!terms) { toast.error("Il faut accepter les conditions d'utilisation et la politique de confidentialité"); return; }
@@ -207,6 +210,7 @@ function SignupForm({ onDone }: { onDone: () => void }) {
     if (error) {
       const msg = error.message.toLowerCase();
       if (msg.includes("too_young")) toast.error(`ChildGram est pour les enfants de ${MIN_SIGNUP_AGE} ans et plus (moyenne section et plus)`);
+      else if (msg.includes("too_old")) toast.error(TOO_OLD_MESSAGE);
       else if (msg.includes("already")) toast.error("Ce pseudo est déjà pris, choisis-en un autre");
       else if (msg.includes("pwned") || msg.includes("weak") || msg.includes("known"))
         toast.error("Ce mot de passe est trop facile à deviner, choisis-en un autre");
@@ -260,6 +264,9 @@ function SignupForm({ onDone }: { onDone: () => void }) {
           <p className="text-sm font-bold text-destructive">
             ChildGram est pour les enfants de {MIN_SIGNUP_AGE} ans et plus (moyenne section et plus).
           </p>
+        )}
+        {birthDate && isTooOldToSignUp(birthDate) && (
+          <p className="text-sm font-bold text-destructive">{TOO_OLD_MESSAGE}</p>
         )}
       </div>
 
