@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Logo } from "@/components/childgram/Logo";
 import { AvatarPicker } from "@/components/childgram/AvatarPicker";
+import { ParentPhraseCheck } from "@/components/childgram/ParentPhraseCheck";
 import {
   BIO_MAX,
   MIN_SIGNUP_AGE,
@@ -20,6 +21,8 @@ import {
   TOO_OLD_MESSAGE,
   isValidUsername,
   needsParentalConsent,
+  needsParentPhrase,
+  areParentPhraseCopiesValid,
   usernameToAuthEmail,
 } from "@/lib/rules";
 import { cn } from "@/lib/utils";
@@ -170,11 +173,14 @@ function SignupForm({ onDone }: { onDone: () => void }) {
   const [bio, setBio] = useState("");
   const [parentConsent, setParentConsent] = useState(false);
   const [terms, setTerms] = useState(false);
+  const [phraseCopies, setPhraseCopies] = useState<string[]>(["", "", ""]);
   const [loading, setLoading] = useState(false);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const age = birthDate ? ageOn(birthDate) : NaN;
   const underAge = birthDate ? needsParentalConsent(birthDate) : false;
+  const needsPhrase = birthDate && !Number.isNaN(age) && age >= MIN_SIGNUP_AGE ? needsParentPhrase(birthDate) : false;
+  const PHRASE_ERROR = "Le parent doit recopier la phrase 3 fois, sans faire de fautes";
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -189,6 +195,7 @@ function SignupForm({ onDone }: { onDone: () => void }) {
     if (isTooOldToSignUp(birthDate)) { toast.error(TOO_OLD_MESSAGE); return; }
     if (underAge && !parentConsent)
       { toast.error("Avant 13 ans, c'est un parent ou un représentant légal qui doit ouvrir le compte"); return; }
+    if (needsPhrase && !areParentPhraseCopiesValid(phraseCopies)) { toast.error(PHRASE_ERROR); return; }
     if (!terms) { toast.error("Il faut accepter les conditions d'utilisation et la politique de confidentialité"); return; }
 
     setLoading(true);
@@ -203,6 +210,7 @@ function SignupForm({ onDone }: { onDone: () => void }) {
           bio: bio.trim().slice(0, BIO_MAX),
           parental_consent: underAge ? parentConsent : false,
           terms_accepted: terms,
+          ...(needsPhrase ? { parent_phrase_copies: phraseCopies } : {}),
         },
       },
     });
@@ -211,6 +219,7 @@ function SignupForm({ onDone }: { onDone: () => void }) {
       const msg = error.message.toLowerCase();
       if (msg.includes("too_young")) toast.error(`ChildGram est pour les enfants de ${MIN_SIGNUP_AGE} ans et plus (moyenne section et plus)`);
       else if (msg.includes("too_old")) toast.error(TOO_OLD_MESSAGE);
+      else if (msg.includes("parent_phrase")) toast.error(PHRASE_ERROR);
       else if (msg.includes("already")) toast.error("Ce pseudo est déjà pris, choisis-en un autre");
       else if (msg.includes("pwned") || msg.includes("weak") || msg.includes("known"))
         toast.error("Ce mot de passe est trop facile à deviner, choisis-en un autre");
@@ -295,6 +304,7 @@ function SignupForm({ onDone }: { onDone: () => void }) {
               Je suis le parent ou le représentant légal de cet enfant. J'ouvre ce compte moi-même et je donne mon autorisation parentale formelle pour qu'il utilise ChildGram.
             </span>
           </label>
+          {needsPhrase && <ParentPhraseCheck copies={phraseCopies} onChange={setPhraseCopies} />}
         </div>
       )}
 

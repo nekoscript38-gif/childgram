@@ -15,7 +15,7 @@ export const Route = createFileRoute("/conditions")({
 
 function Terms() {
   return (
-    <LegalLayout title="Conditions d'utilisation" updated="16 novembre 2026">
+    <LegalLayout title="Conditions d'utilisation" updated="17 novembre 2026">
       <p>
         Bienvenue sur ChildGram ! ChildGram est une plateforme où les enfants peuvent dessiner, publier leurs dessins sur leur profil
         et les partager avec d'autres enfants, qui peuvent leur envoyer des cœurs et des commentaires. En créant un compte ou en
@@ -37,6 +37,13 @@ function Terms() {
         <li>
           <strong>Moins de 13 ans :</strong> tout utilisateur de moins de 13 ans doit disposer d'une <strong>autorisation parentale formelle</strong>.
           Le compte doit être <strong>ouvert par un parent ou un représentant légal</strong>, qui le confirme lors de l'inscription.
+        </li>
+        <li>
+          <strong>7 ans ou moins :</strong> à l'inscription, le parent doit <strong>recopier trois fois, sans faute</strong>, la phrase
+          suivante : « je confirme que je suis le parent de cet enfant que l'enfant est réel, que c'est lui qui dessine mais que je le
+          supervise et que ce n'est pas lui qui écrit. » Un enfant de cet âge sait à peine lire : cette étape permet de vérifier qu'un
+          adulte l'accompagne vraiment, et d'écarter les faux comptes d'adultes qui se font passer pour de très jeunes enfants. Sans les
+          trois copies exactes, le compte ne peut pas être créé.
         </li>
         <li>
           Le parent ou représentant légal reste responsable de l'utilisation de ChildGram par l'enfant et l'accompagne dans sa découverte de la plateforme.
@@ -88,21 +95,49 @@ function Terms() {
         l'administratrice. L'âge pris en compte est l'âge actuel, calculé à partir de la date de naissance.
       </p>
 
-      <h2>3. Le compte</h2>
+      <h2>3. Les heures de connexion (couvre-feu)</h2>
+      <p>
+        Un enfant qui se connecte à des heures improbables pour son âge, c'est bizarre. ChildGram ferme donc certaines heures selon
+        l'âge déclaré (heure de Paris) :
+      </p>
+      <ul>
+        <li><strong>De 4 à 8 ans :</strong> pas de connexion avant 8h, ni à partir de 20h, ni entre 14h et 16h.</li>
+        <li><strong>De 9 à 13 ans :</strong> pas de connexion avant 7h, ni à partir de 21h, ni entre 14h et 17h.</li>
+        <li><strong>De 14 à 17 ans :</strong> pas de connexion avant 6h, ni à partir de 22h, ni entre 15h et 18h.</li>
+        <li><strong>Pré-adultes et adultes (18 ans et plus) :</strong> pas de couvre-feu.</li>
+      </ul>
+      <p>
+        Les heures de l'après-midi ne comptent que les jours d'école (lundi, mardi, jeudi et vendredi), pas le mercredi, le samedi ni le
+        dimanche. Les vacances scolaires ne sont pas prises en compte. Chacun peut voir ses horaires dans ses réglages.
+      </p>
+      <ul>
+        <li><strong>1re connexion pendant le couvre-feu :</strong> un avertissement s'affiche.</li>
+        <li>
+          <strong>2e connexion pendant le couvre-feu :</strong> le compte est automatiquement mis à 0 an (voir la partie 8) et
+          temporairement désactivé. Un message automatique explique qu'il a été désactivé pour activité de connexion à des horaires
+          suspects pour l'âge déclaré.
+        </li>
+        <li>
+          Les avertissements ne s'effacent pas avec le temps. L'administratrice peut réactiver un compte en cas d'erreur, ce qui remet le
+          compteur à zéro, et elle peut adapter les horaires de chaque compte.
+        </li>
+      </ul>
+
+      <h2>4. Le compte</h2>
       <ul>
         <li>On s'inscrit avec un pseudo et un mot de passe. Aucune adresse e-mail n'est demandée.</li>
         <li>Le profil contient un pseudo, une date de naissance (gardée secrète), une bio facultative et un avatar choisi parmi 20 images proposées.</li>
         <li>Pour la sécurité des enfants, il n'est pas possible d'importer sa propre photo ni de mettre un lien vers une image en avatar.</li>
       </ul>
 
-      <h2>4. Pas d'informations privées</h2>
+      <h2>5. Pas d'informations privées</h2>
       <p>
         ChildGram fait confiance à l'enfant et à ses parents pour <strong>ne jamais divulguer de données privées</strong>, ni sur lui-même, ni sur
         un autre enfant qu'il connaît. Cela veut dire : pas de vrai nom complet, pas d'adresse, pas de nom d'école, pas de numéro de
         téléphone, pas de photo, pas de réseau social, dans le pseudo, la bio, les titres, les dessins ou les commentaires.
       </p>
 
-      <h2>5. Les règles de gentillesse</h2>
+      <h2>6. Les règles de gentillesse</h2>
       <ul>
         <li>On publie uniquement ses propres dessins.</li>
         <li>On laisse des commentaires gentils et respectueux. Pas de moqueries, d'insultes ni de harcèlement.</li>
@@ -114,13 +149,13 @@ function Terms() {
         </li>
       </ul>
 
-      <h2>6. Tes dessins</h2>
+      <h2>7. Tes dessins</h2>
       <p>
         Tes dessins t'appartiennent. En les publiant, tu autorises ChildGram à les afficher aux autres utilisateurs connectés de la plateforme.
         Tu peux à tout moment retirer un dessin de ton profil ou le supprimer depuis ton studio.
       </p>
 
-      <h2>7. Modération</h2>
+      <h2>8. Modération</h2>
       <p>
         ChildGram peut retirer un dessin, un commentaire ou suspendre un compte qui ne respecte pas ces règles, notamment pour protéger
         les enfants. Le propriétaire d'un dessin peut supprimer les commentaires reçus sur ce dessin.
@@ -146,19 +181,19 @@ function Terms() {
         le bannissement est levé. L'administratrice garde l'historique de la conversation.
       </p>
 
-      <h2>8. Responsabilité</h2>
+      <h2>9. Responsabilité</h2>
       <p>
         ChildGram fait de son mieux pour offrir un espace sûr et disponible, mais ne peut pas garantir l'absence totale d'interruptions ou
         d'erreurs. Les parents ou représentants légaux restent responsables de l'encadrement de l'enfant.
       </p>
 
-      <h2>9. Données personnelles</h2>
+      <h2>10. Données personnelles</h2>
       <p>
         La façon dont nous traitons les données est expliquée dans notre{" "}
         <Link to="/confidentialite" className="text-primary underline">politique de confidentialité</Link>.
       </p>
 
-      <h2>10. Changements</h2>
+      <h2>11. Changements</h2>
       <p>Ces conditions peuvent évoluer. En cas de changement important, nous l'indiquerons sur la plateforme.</p>
     </LegalLayout>
   );

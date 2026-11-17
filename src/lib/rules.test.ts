@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, CURFEW_STRIKES_TO_BAN, curfewFor, defaultCurfew, isInCurfew, canCommentBetween, canSendBanMessage, effectiveAge, isAllowedAdminBirthDate, isOldEnoughToSignUp, isTooOldToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
+import { ageOn, areParentPhraseCopiesValid, isParentPhraseCopyCorrect, needsParentPhrase, PARENT_PHRASE, CURFEW_STRIKES_TO_BAN, curfewFor, defaultCurfew, isInCurfew, canCommentBetween, canSendBanMessage, effectiveAge, isAllowedAdminBirthDate, isOldEnoughToSignUp, isTooOldToSignUp, isValidBirthDate, isValidUsername, needsParentalConsent, usernameToAuthEmail } from "./rules";
 import { AVATARS } from "./avatars";
 import { BRUSH_SIZES, PALETTE } from "./palette";
 
@@ -230,5 +230,33 @@ describe("curfew by declared age", () => {
   });
   it("bans at the 2nd suspicious connection", () => {
     expect(CURFEW_STRIKES_TO_BAN).toBe(2);
+  });
+});
+
+describe("parent sentence at sign-up (7 or younger)", () => {
+  it("is required for a 7-year-old (day before the 8th birthday)", () => {
+    expect(needsParentPhrase("2018-11-13", today)).toBe(true);
+  });
+  it("is not required on the 8th birthday", () => {
+    expect(needsParentPhrase("2018-11-12", today)).toBe(false);
+  });
+  it("accepts the exact sentence, with a capital letter, straight apostrophes and no final period", () => {
+    expect(isParentPhraseCopyCorrect(PARENT_PHRASE)).toBe(true);
+    expect(
+      isParentPhraseCopyCorrect(
+        "Je confirme que je suis le parent de cet enfant que l'enfant est réel, que c'est lui qui dessine mais que je le supervise et que ce n'est pas lui qui écrit",
+      ),
+    ).toBe(true);
+  });
+  it("refuses a missing accent", () => {
+    expect(isParentPhraseCopyCorrect(PARENT_PHRASE.replace("réel", "reel"))).toBe(false);
+  });
+  it("refuses a missing word", () => {
+    expect(isParentPhraseCopyCorrect(PARENT_PHRASE.replace(" mais que je le supervise", ""))).toBe(false);
+  });
+  it("needs exactly 3 correct copies", () => {
+    expect(areParentPhraseCopiesValid([PARENT_PHRASE, PARENT_PHRASE, PARENT_PHRASE])).toBe(true);
+    expect(areParentPhraseCopiesValid([PARENT_PHRASE, PARENT_PHRASE])).toBe(false);
+    expect(areParentPhraseCopiesValid([PARENT_PHRASE, PARENT_PHRASE, "je confirme"])).toBe(false);
   });
 });

@@ -185,7 +185,7 @@ export function isInCurfew(schedule: CurfewSchedule | null, time: string, isoDow
   return false;
 }
 
-const frTime = (t: string) => t.replace(":", "h").replace(/h00$/, "h");
+const frTime = (t: string) => t.replace(/^0(\d)/, "$1").replace(":", "h").replace(/h00$/, "h");
 
 /** Human French description of a schedule, one line per rule. */
 export function describeCurfew(schedule: CurfewSchedule | null): string[] {
@@ -196,4 +196,39 @@ export function describeCurfew(schedule: CurfewSchedule | null): string[] {
   if (schedule.noonStart && schedule.noonEnd)
     lines.push(`Pas entre ${frTime(schedule.noonStart)} et ${frTime(schedule.noonEnd)} (lundi, mardi, jeudi, vendredi)`);
   return lines;
+}
+
+/**
+ * Parent check at sign-up: for a child aged PARENT_PHRASE_MAX_AGE or less, the parent copies
+ * PARENT_PHRASE PARENT_PHRASE_COPIES times without mistakes. Case, apostrophe style, extra spaces
+ * and the final period don't count; letters, accents and the comma do.
+ * Mirrors `normalize_parent_phrase` + `handle_new_user` in the database (the real enforcement).
+ */
+export const PARENT_PHRASE_MAX_AGE = 7;
+export const PARENT_PHRASE_COPIES = 3;
+export const PARENT_PHRASE =
+  "je confirme que je suis le parent de cet enfant que l’enfant est réel, que c’est lui qui dessine mais que je le supervise et que ce n’est pas lui qui écrit.";
+
+export function normalizeParentPhrase(text: string) {
+  return text
+    .normalize("NFC")
+    .replace(/[’ʼ‘`´]/g, "'")
+    .replace(/[\s\u00a0\u202f]+/g, " ")
+    .replace(/ ,/g, ",")
+    .trim()
+    .toLowerCase()
+    .replace(/\s*\.$/, "");
+}
+
+export function needsParentPhrase(birthDate: string, today: Date = new Date()) {
+  const age = ageOn(birthDate, today);
+  return !Number.isNaN(age) && age <= PARENT_PHRASE_MAX_AGE;
+}
+
+export function isParentPhraseCopyCorrect(text: string) {
+  return normalizeParentPhrase(text) === normalizeParentPhrase(PARENT_PHRASE);
+}
+
+export function areParentPhraseCopiesValid(copies: string[]) {
+  return copies.length === PARENT_PHRASE_COPIES && copies.every(isParentPhraseCopyCorrect);
 }
