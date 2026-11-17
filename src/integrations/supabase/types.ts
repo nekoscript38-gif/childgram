@@ -308,6 +308,7 @@ export type Database = {
         Returns: boolean
       }
       is_banned: { Args: { _user_id: string }; Returns: boolean }
+      normalize_parent_phrase: { Args: { _s: string }; Returns: string }
     }
     Enums: {
       app_role: "admin"
