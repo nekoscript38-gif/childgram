@@ -185,7 +185,7 @@ export function isInCurfew(schedule: CurfewSchedule | null, time: string, isoDow
   return false;
 }
 
-const frTime = (t: string) => t.replace(":", "h").replace(/h00$/, "h");
+const frTime = (t: string) => t.replace(/^0(\d)/, "$1").replace(":", "h").replace(/h00$/, "h");
 
 /** Human French description of a schedule, one line per rule. */
 export function describeCurfew(schedule: CurfewSchedule | null): string[] {

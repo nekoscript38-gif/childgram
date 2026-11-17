@@ -160,8 +160,9 @@ function CurfewSection({ priv }: { priv: PrivRow }) {
           </p>
           {priv.curfew_strikes > 0 && (
             <p className="rounded-2xl border-[2.5px] border-ink bg-accent p-3 font-bold">
-              Tu as déjà reçu {priv.curfew_strikes} avertissement{priv.curfew_strikes > 1 ? "s" : ""} sur {CURFEW_STRIKES_TO_BAN - 1}{" "}
-              possible{CURFEW_STRIKES_TO_BAN - 1 > 1 ? "s" : ""}.
+              {priv.curfew_strikes >= CURFEW_STRIKES_TO_BAN - 1
+                ? "Tu as déjà reçu un avertissement : la prochaine connexion pendant ton couvre-feu désactivera ton compte."
+                : `Tu as déjà reçu ${priv.curfew_strikes} avertissement${priv.curfew_strikes > 1 ? "s" : ""}.`}
             </p>
           )}
         </>
