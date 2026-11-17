@@ -15,7 +15,7 @@ export const Route = createFileRoute("/confidentialite")({
 
 function Privacy() {
   return (
-    <LegalLayout title="Politique de confidentialité" updated="12 novembre 2026">
+    <LegalLayout title="Politique de confidentialité" updated="17 novembre 2026">
       <p>
         ChildGram est pensé pour les enfants : nous collectons le moins de données possible. Cette page explique, aux enfants comme
         aux parents, ce que nous gardons et pourquoi.
@@ -27,6 +27,8 @@ function Privacy() {
         <li><strong>Mot de passe</strong> : stocké de façon chiffrée, personne ne peut le lire, pas même nous.</li>
         <li><strong>Date de naissance</strong> : sert uniquement à vérifier si une autorisation parentale est nécessaire. Elle n'est jamais affichée aux autres.</li>
         <li><strong>Autorisation parentale</strong> : pour les moins de 13 ans, nous enregistrons que le parent ou représentant légal a confirmé ouvrir le compte et donner son accord, ainsi que la date d'acceptation des conditions.</li>
+        <li><strong>Phrase recopiée par le parent</strong> : pour les enfants de 7 ans ou moins, les trois copies de la phrase de confirmation écrites par le parent à l'inscription sont gardées avec le compte, comme preuve. Personne d'autre ne les voit.</li>
+        <li><strong>Connexions pendant le couvre-feu</strong> : nous n'enregistrons pas tes heures de connexion habituelles. Seulement quand tu te connectes pendant ton couvre-feu, nous gardons le nombre d'avertissements et l'heure du dernier, pour appliquer les <Link to="/conditions" className="text-primary underline">conditions d'utilisation</Link>. Seuls toi (le nombre) et l'administratrice les voient.</li>
         <li><strong>Bio et avatar</strong> : la bio facultative et l'avatar choisi parmi nos 20 images, visibles par les autres utilisateurs connectés.</li>
         <li><strong>Dessins, cœurs et commentaires</strong> : les brouillons ne sont visibles que par toi ; les dessins publiés, les cœurs et les commentaires sont visibles par les utilisateurs connectés.</li>
         <li><strong>Messages en cas de bannissement</strong> : si un profil est banni, les messages échangés avec l'administratrice ne sont visibles que par ce profil (tant qu'il est banni) et par l'administratrice.</li>
@@ -40,7 +42,8 @@ function Privacy() {
       <ul>
         <li>Faire fonctionner ton compte, ton studio et ton profil.</li>
         <li>Afficher tes dessins publiés, les cœurs et les commentaires aux autres enfants.</li>
-        <li>Vérifier l'autorisation parentale pour les moins de 13 ans.</li>
+        <li>Vérifier l'autorisation parentale pour les moins de 13 ans, et la présence d'un parent pour les 7 ans et moins.</li>
+        <li>Appliquer le couvre-feu selon l'âge déclaré.</li>
         <li>Protéger la communauté et faire respecter les <Link to="/conditions" className="text-primary underline">conditions d'utilisation</Link>.</li>
       </ul>
       <p>Nous ne vendons aucune donnée et n'affichons aucune publicité.</p>

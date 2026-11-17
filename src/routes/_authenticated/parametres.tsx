@@ -5,7 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Lock, LogOut, Save } from "lucide-react";
+import { Lock, LogOut, Moon, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { AvatarPicker } from "@/components/childgram/AvatarPicker";
 import { KidAvatar } from "@/components/childgram/Avatar";
 import { meQuery, myPrivateQuery } from "@/lib/queries";
-import { BIO_MAX } from "@/lib/rules";
+import { BIO_MAX, CURFEW_STRIKES_TO_BAN, ageOn, curfewFor, describeCurfew } from "@/lib/rules";
 
 export const Route = createFileRoute("/_authenticated/parametres")({
   loader: ({ context }) =>
@@ -119,6 +119,8 @@ function Settings() {
         )}
       </section>
 
+      {priv && !banned && <CurfewSection priv={priv} />}
+
       <section className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-4 text-sm font-bold">
           <Link to="/conditions" className="underline hover:text-primary">Conditions d'utilisation</Link>
@@ -129,5 +131,43 @@ function Settings() {
         </Button>
       </section>
     </div>
+  );
+}
+
+type PrivRow = NonNullable<Awaited<ReturnType<NonNullable<typeof myPrivateQuery.queryFn>>>>;
+
+/** Shows the kid their own curfew hours (the database enforces them in check_curfew). */
+function CurfewSection({ priv }: { priv: PrivRow }) {
+  const schedule = curfewFor(ageOn(priv.birth_date), priv);
+  return (
+    <section className="sticker space-y-3 p-5">
+      <h2 className="flex items-center gap-2 text-2xl font-bold">
+        <Moon className="h-5 w-5" /> Tes horaires
+      </h2>
+      {schedule ? (
+        <>
+          <p className="font-semibold text-muted-foreground">
+            Pour ton âge, ChildGram est fermé à certaines heures (heure de Paris) :
+          </p>
+          <ul className="list-disc space-y-1 pl-6 font-bold">
+            {describeCurfew(schedule).map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+          <p className="text-sm font-semibold">
+            Si tu te connectes pendant ces heures, tu reçois un avertissement. À la {CURFEW_STRIKES_TO_BAN}e fois, ton compte est
+            désactivé et seule l'administratrice peut le réactiver.
+          </p>
+          {priv.curfew_strikes > 0 && (
+            <p className="rounded-2xl border-[2.5px] border-ink bg-accent p-3 font-bold">
+              Tu as déjà reçu {priv.curfew_strikes} avertissement{priv.curfew_strikes > 1 ? "s" : ""} sur {CURFEW_STRIKES_TO_BAN - 1}{" "}
+              possible{CURFEW_STRIKES_TO_BAN - 1 > 1 ? "s" : ""}.
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="font-semibold text-muted-foreground">Pas de couvre-feu pour ton compte : tu peux venir à toute heure.</p>
+      )}
+    </section>
   );
 }
