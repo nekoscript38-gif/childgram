@@ -49,10 +49,10 @@ export function ParentPhraseCheck({ copies, onChange }: { copies: string[]; onCh
                 next[i] = e.target.value;
                 onChange(next);
               }}
-              className={cn(ok && "border-primary")}
+              className={cn(ok && "border-accent")}
             />
             {ok && (
-              <p className="flex items-center gap-1 text-sm font-bold text-primary">
+              <p className="inline-flex items-center gap-1 rounded-full border-[2px] border-ink bg-accent px-3 py-0.5 text-sm font-bold text-accent-foreground">
                 <CheckCircle2 className="h-4 w-4" /> Sans faute !
               </p>
             )}
